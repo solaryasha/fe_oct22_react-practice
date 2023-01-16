@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import cn from 'classnames';
 import './App.scss';
 
@@ -31,7 +31,23 @@ const getFullPhotos = (): PhotoFull[] => {
 };
 
 export const App: React.FC = () => {
+  const [query, setQuery] = useState('');
+
   const fullPhotos = getFullPhotos();
+
+  const visiblePhotos = fullPhotos.filter(photo => {
+    const photoTitle = photo.title.toLowerCase();
+
+    const normalizedOuery = query
+      .toLowerCase()
+      .trim();
+
+    return photoTitle.includes(normalizedOuery);
+  });
+
+  // const reset = () => {
+  //   setQuery('');
+  // };
 
   return (
     <div className="section">
@@ -75,20 +91,26 @@ export const App: React.FC = () => {
                   type="text"
                   className="input"
                   placeholder="Search"
-                  value="qwe"
+                  value={query}
+                  onChange={(event) => {
+                    setQuery(event.target.value);
+                  }}
                 />
 
                 <span className="icon is-left">
                   <i className="fas fa-search" aria-hidden="true" />
                 </span>
 
-                <span className="icon is-right">
-                  {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
-                  <button
-                    type="button"
-                    className="delete"
-                  />
-                </span>
+                {query && (
+                  <span className="icon is-right">
+                    {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
+                    <button
+                      type="button"
+                      className="delete"
+                      onClick={() => setQuery('')}
+                    />
+                  </span>
+                )}
               </p>
             </div>
 
@@ -207,7 +229,7 @@ export const App: React.FC = () => {
             </thead>
 
             <tbody>
-              {fullPhotos.map(photo => (
+              {visiblePhotos.map(photo => (
                 <tr>
                   <td className="has-text-weight-bold">
                     {photo.id}
