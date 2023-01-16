@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './App.scss';
+import cn from 'classnames';
 
 // import usersFromServer from './api/users';
 // import photosFromServer from './api/photos';
@@ -8,6 +9,13 @@ import { getPreparedPhoto } from './helpers/helpers';
 
 export const App: React.FC = () => {
   const [photos] = useState(getPreparedPhoto());
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const visiblePhotos = photos.filter(photo => {
+    return photo.title.toLowerCase().includes(
+      searchQuery.toLocaleLowerCase(),
+    );
+  });
 
   return (
     <div className="section">
@@ -51,7 +59,8 @@ export const App: React.FC = () => {
                   type="text"
                   className="input"
                   placeholder="Search"
-                  value="qwe"
+                  value={searchQuery}
+                  onChange={e => setSearchQuery(e.target.value)}
                 />
 
                 <span className="icon is-left">
@@ -183,7 +192,7 @@ export const App: React.FC = () => {
             </thead>
 
             <tbody>
-              {photos.map(photo => (
+              {visiblePhotos.map(photo => (
                 <tr>
                   <td className="has-text-weight-bold">
                     {photo.id}
@@ -192,7 +201,11 @@ export const App: React.FC = () => {
                   <td>{photo.title}</td>
                   <td>{photo.album?.title}</td>
 
-                  <td className="has-text-link">
+                  <td className={cn({
+                    'has-text-link': photo.album?.user?.sex === 'm',
+                    'has-text-danger': photo.album?.user?.sex === 'f',
+                  })}
+                  >
                     {photo.album?.user?.name}
                   </td>
                 </tr>

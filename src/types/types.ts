@@ -24,5 +24,3 @@ export interface AlbumFull extends Album {
 export interface PhotoFull extends Photo {
   album?: AlbumFull,
 }
-
-
