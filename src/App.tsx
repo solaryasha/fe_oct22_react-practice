@@ -9,13 +9,17 @@ import users from './api/users';
 export const App: React.FC = () => {
   const [photos] = useState<FullPhoto[]>(getPrepPhotos);
   const [selectedUserId, setSelectedUserId] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const visiblePhotos = photos.filter(photo => {
     const isUserIdMatch = selectedUserId !== 0
       ? photo.owner?.id === selectedUserId
       : true;
 
-    return isUserIdMatch;
+    // eslint-disable-next-line max-len
+    const isSearchQueryMatch = photo.title.toLowerCase().includes(searchQuery.toLowerCase());
+
+    return isUserIdMatch && isSearchQueryMatch;
   });
 
   return (
@@ -54,20 +58,24 @@ export const App: React.FC = () => {
                   type="text"
                   className="input"
                   placeholder="Search"
-                  value="qwe"
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
                 />
 
                 <span className="icon is-left">
                   <i className="fas fa-search" aria-hidden="true" />
                 </span>
 
-                <span className="icon is-right">
-                  {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
-                  <button
-                    type="button"
-                    className="delete"
-                  />
-                </span>
+                {searchQuery && (
+                  <span className="icon is-right">
+                    {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
+                    <button
+                      type="button"
+                      className="delete"
+                      onClick={() => setSearchQuery('')}
+                    />
+                  </span>
+                )}
               </p>
             </div>
 
