@@ -8,6 +8,7 @@ import { filterPhotos } from './helpers/helpers';
 
 export const App: React.FC = () => {
   const [photos] = useState(getPepearedPhotos);
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedUserId, setSelectedUserId] = useState(0);
   const [selectedAlbums, setSelectedAlbums] = useState<number[]>([]);
 
@@ -21,10 +22,18 @@ export const App: React.FC = () => {
     });
   };
 
-  const visiblePhotos = filterPhotos(
-    photos,
-    { selectedUserId, selectedAlbums },
-  );
+  // eslint-disable-next-line max-len
+  const visiblePhotos = filterPhotos(photos, {
+    searchQuery,
+    selectedUserId,
+    selectedAlbums,
+  });
+
+  const handleReset = () => {
+    setSearchQuery('');
+    setSelectedUserId(0);
+    setSelectedAlbums([]);
+  };
 
   return (
     <div className="section">
@@ -66,20 +75,26 @@ export const App: React.FC = () => {
                   type="text"
                   className="input"
                   placeholder="Search"
-                  value="qwe"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
                 />
 
                 <span className="icon is-left">
                   <i className="fas fa-search" aria-hidden="true" />
                 </span>
 
-                <span className="icon is-right">
-                  {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
-                  <button
-                    type="button"
-                    className="delete"
-                  />
-                </span>
+                {
+                  searchQuery && (
+                    <span className="icon is-right">
+                      {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
+                      <button
+                        type="button"
+                        className="delete"
+                        onClick={() => setSearchQuery('')}
+                      />
+                    </span>
+                  )
+                }
               </p>
             </div>
 
@@ -117,8 +132,15 @@ export const App: React.FC = () => {
             <div className="panel-block">
               <a
                 href="#/"
-                className="button is-link is-outlined is-fullwidth"
-
+                className={cn(
+                  'button is-link is-fullwidth',
+                  {
+                    'is-outlined': !searchQuery.length
+                      && !selectedAlbums.length
+                      && selectedUserId === 0,
+                  },
+                )}
+                onClick={() => handleReset()}
               >
                 Reset all filters
               </a>
@@ -127,9 +149,13 @@ export const App: React.FC = () => {
         </div>
 
         <div className="box table-container">
-          <p data-cy="NoMatchingMessage">
-            No photos matching selected criteria
-          </p>
+          {
+            !visiblePhotos.length && (
+              <p data-cy="NoMatchingMessage">
+                No photos matching selected criteria
+              </p>
+            )
+          }
 
           <table
             className="table is-striped is-narrow is-fullwidth"
