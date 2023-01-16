@@ -29,6 +29,19 @@ export const App: React.FC = () => {
   const [photos] = useState(getPreparedPhotos);
   const [selectedUserId, setSelectedUserId] = useState(0);
   const [query, setQuery] = useState('');
+  const [
+    selectedAlbumsIds, setSelectedAlbumsIds,
+  ] = useState<number[]>([]);
+
+  const onSelectAlbumFilter = (id: number) => {
+    setSelectedAlbumsIds((prev) => {
+      if (prev.includes(id)) {
+        return prev.filter(el => el !== id);
+      }
+
+      return [...prev, id];
+    });
+  };
 
   const normalizedQuery = query.toLowerCase().trim();
 
@@ -43,12 +56,17 @@ export const App: React.FC = () => {
       ? normalizedTitle.includes(normalizedQuery)
       : true;
 
-    return isUserIdSelected && isQueryMatch;
+    const isAlbumsMatch = selectedAlbumsIds.length
+      ? selectedAlbumsIds.includes(photo.albumId)
+      : true;
+
+    return isUserIdSelected && isQueryMatch && isAlbumsMatch;
   });
 
   const resetAllFilters = () => {
     setQuery('');
     setSelectedUserId(0);
+    setSelectedAlbumsIds([]);
   };
 
   return (
@@ -114,42 +132,25 @@ export const App: React.FC = () => {
               <a
                 href="#/"
                 className="button is-success mr-6 is-outlined"
+                onClick={() => setSelectedAlbumsIds([])}
               >
                 All
               </a>
 
-              <a
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Album 1
-              </a>
-
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 2
-              </a>
-
-              <a
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Album 3
-              </a>
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 4
-              </a>
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 5
-              </a>
+              {albumsFromServer.map(album => (
+                <a
+                  className={classNames(
+                    'button mr-2 my-1',
+                    {
+                      'is-info': selectedAlbumsIds.includes(album.id),
+                    },
+                  )}
+                  href="#/"
+                  onClick={() => onSelectAlbumFilter(album.id)}
+                >
+                  {`Album ${album.id}`}
+                </a>
+              ))}
             </div>
 
             <div className="panel-block">
