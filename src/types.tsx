@@ -19,7 +19,7 @@ export interface User {
 }
 
 // to combine everything in one interface
-export interface fullPhotosAlbum extends Photos {
-  album?: Album,
-  user?: User,
-}
+// export interface fullPhotosAlbum extends Photos {
+//   album?: Album,
+//   user?: User,
+// }
