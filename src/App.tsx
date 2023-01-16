@@ -25,13 +25,22 @@ const getPreparedPhotos = (): FullPhoto[] => {
 export const App: React.FC = () => {
   const [photos] = useState(getPreparedPhotos);
   const [selectedUserId, setSelectedUserId] = useState(0);
+  const [query, setQuery] = useState('');
+
+  const normalizedQuery = query.toLowerCase().trim();
 
   const visiblePhotos = photos.filter(photo => {
+    const normalizedTitle = photo.title.toLowerCase();
+
     const isUserIdSelected = selectedUserId !== 0
       ? photo.user?.id === selectedUserId
       : true;
 
-    return isUserIdSelected;
+    const isQueryMatch = query
+      ? normalizedTitle.includes(normalizedQuery)
+      : true;
+
+    return isUserIdSelected && isQueryMatch;
   });
 
   return (
@@ -70,20 +79,24 @@ export const App: React.FC = () => {
                   type="text"
                   className="input"
                   placeholder="Search"
-                  value="qwe"
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
                 />
 
                 <span className="icon is-left">
                   <i className="fas fa-search" aria-hidden="true" />
                 </span>
 
-                <span className="icon is-right">
-                  {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
-                  <button
-                    type="button"
-                    className="delete"
-                  />
-                </span>
+                {query && (
+                  <span className="icon is-right">
+                    {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
+                    <button
+                      type="button"
+                      className="delete"
+                      onClick={() => setQuery('')}
+                    />
+                  </span>
+                )}
               </p>
             </div>
 
