@@ -9,7 +9,6 @@ import albumsFromServer from './api/albums';
 
 import { FullPhoto } from './Types/types';
 import { TableItem } from './TableItem';
-import users from './api/users';
 
 const findAlbumById = (albumId: number) => {
   return albumsFromServer.find(album => album.id === albumId);
@@ -62,7 +61,7 @@ export const App: React.FC = () => {
                 All
               </a>
 
-              {users.map(user => (
+              {usersFromServer.map(user => (
                 <a
                   key={user.id}
                   href="#/"
