@@ -11,6 +11,7 @@ export const App: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUserId, setSelectedUserId] = useState(0);
   const [selectedAlbums, setSelectedAlbums] = useState<number[]>([]);
+  // const [statusIdSort, setStatusIdSort] = useState(0);
 
   const onSelectAlbumFilter = (albumId: number) => {
     setSelectedAlbums(prev => {
@@ -124,7 +125,7 @@ export const App: React.FC = () => {
                   key={album.id}
                   onClick={() => onSelectAlbumFilter(album.id)}
                 >
-                  {album.title}
+                  {album.title.split(' ')[0]}
                 </a>
               ))}
             </div>
@@ -166,7 +167,9 @@ export const App: React.FC = () => {
                   <span className="is-flex is-flex-wrap-nowrap">
                     ID
 
-                    <a href="#/">
+                    <a
+                      href="#/"
+                    >
                       <span className="icon">
                         <i data-cy="SortIcon" className="fas fa-sort" />
                       </span>
