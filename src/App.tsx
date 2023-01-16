@@ -238,7 +238,7 @@ export const App: React.FC = () => {
                         <td>{photo.title}</td>
 
                         <td className={classNames(
-                          { 'has-text-danger': photo.user?.sex === 'f' },
+                          { 'has-text-danger': photo.user.sex === 'f' },
                           { 'has-text-link': photo.user?.sex === 'm' },
                         )}
                         >

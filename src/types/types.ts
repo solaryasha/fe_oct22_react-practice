@@ -12,9 +12,9 @@ export interface Album {
 }
 
 export interface User {
-  id: 1;
-  name: 'Roma';
-  sex: 'm';
+  id: number;
+  name: string;
+  sex: string;
 }
 
 export interface PreparedPhotos extends Photo {
