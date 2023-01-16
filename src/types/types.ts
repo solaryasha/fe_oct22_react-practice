@@ -20,4 +20,5 @@ export interface User {
 export interface PreparedPhotos extends Photo {
   albumtitle: string;
   username: string;
+  user: User;
 }

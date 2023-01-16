@@ -20,12 +20,22 @@ const getPreparedPhotos = (): PreparedPhotos[] => {
       ...photo,
       albumtitle: foundAlbum?.title,
       username: foundUser.name,
+      user: foundUser,
     });
   });
 };
 
 export const App: React.FC = () => {
   const [photos] = useState(getPreparedPhotos);
+  const [selectedUserId, setSelectedUserId] = useState(0);
+
+  const visiblePhotos = photos.filter(photo => {
+    const isUserIdSelected = selectedUserId !== 0
+      ? photo.user?.id === selectedUserId
+      : true;
+
+    return isUserIdSelected;
+  });
 
   return (
     <div className="section">
@@ -43,24 +53,18 @@ export const App: React.FC = () => {
                 All
               </a>
 
-              <a
-                href="#/"
-              >
-                User 1
-              </a>
+              {usersFromServer.map(user => (
+                <a
+                  href="#/"
+                  onClick={() => setSelectedUserId(user.id)}
+                  className={classNames({
+                    'is-active': selectedUserId === user.id,
+                  })}
+                >
+                  {user.name}
+                </a>
+              ))}
 
-              <a
-                href="#/"
-                className="is-active"
-              >
-                User 2
-              </a>
-
-              <a
-                href="#/"
-              >
-                User 3
-              </a>
             </p>
 
             <div className="panel-block">
@@ -201,11 +205,11 @@ export const App: React.FC = () => {
             </thead>
 
             <tbody>
-              {photos.map(photo => {
-                const foundAlbum = albumsFromServer.find(album => (
-                  album.id === photo.albumId));
-                const foundUser = usersFromServer.find(user => (
-                  user.id === foundAlbum?.userId));
+              {visiblePhotos.map(photo => {
+                // const foundAlbum = albumsFromServer.find(album => (
+                //   album.id === photo.albumId));
+                // const foundUser = usersFromServer.find(user => (
+                //   user.id === foundAlbum?.userId));
 
                 return (
                   <tr key={photo.id}>
@@ -216,10 +220,10 @@ export const App: React.FC = () => {
                     <td>{photo.username}</td>
                     <td>{photo.title}</td>
 
-                    <td className={classNames({
-                      'has-text-link': foundUser?.sex === 'm',
-                      'has-text-danger': foundUser?.sex === 'w',
-                    })}
+                    <td className={classNames(
+                      { 'has-text-danger': photo.user?.sex === 'f' },
+                      { 'has-text-link': photo.user?.sex === 'm' },
+                    )}
                     >
                       {photo.username}
                     </td>
