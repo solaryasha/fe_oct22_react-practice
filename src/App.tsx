@@ -11,6 +11,11 @@ export const App: React.FC = () => {
   const [selectedUserId, setSelectedUserId] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
 
+  const clearFilters = () => {
+    setSelectedUserId(0);
+    setSearchQuery('');
+  };
+
   const visiblePhotos = photos.filter(photo => {
     const isUserIdMatch = selectedUserId !== 0
       ? photo.owner?.id === selectedUserId
@@ -125,7 +130,7 @@ export const App: React.FC = () => {
               <a
                 href="#/"
                 className="button is-link is-outlined is-fullwidth"
-
+                onClick={clearFilters}
               >
                 Reset all filters
               </a>
@@ -134,92 +139,96 @@ export const App: React.FC = () => {
         </div>
 
         <div className="box table-container">
-          <p data-cy="NoMatchingMessage">
-            No photos matching selected criteria
-          </p>
+          {!visiblePhotos.length && (
+            <p data-cy="NoMatchingMessage">
+              No photos matching selected criteria
+            </p>
+          )}
 
-          <table
-            className="table is-striped is-narrow is-fullwidth"
-          >
-            <thead>
-              <tr>
-                <th>
-                  <span className="is-flex is-flex-wrap-nowrap">
-                    ID
-
-                    <a href="#/">
-                      <span className="icon">
-                        <i data-cy="SortIcon" className="fas fa-sort" />
-                      </span>
-                    </a>
-                  </span>
-                </th>
-
-                <th>
-                  <span className="is-flex is-flex-wrap-nowrap">
-                    Photo name
-
-                    <a href="#/">
-                      <span className="icon">
-                        <i className="fas fa-sort-down" />
-                      </span>
-                    </a>
-                  </span>
-                </th>
-
-                <th>
-                  <span className="is-flex is-flex-wrap-nowrap">
-                    Album name
-
-                    <a href="#/">
-                      <span className="icon">
-                        <i className="fas fa-sort-up" />
-                      </span>
-                    </a>
-                  </span>
-                </th>
-
-                <th>
-                  <span className="is-flex is-flex-wrap-nowrap">
-                    User name
-
-                    <a href="#/">
-                      <span className="icon">
-                        <i className="fas fa-sort" />
-                      </span>
-                    </a>
-                  </span>
-                </th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {visiblePhotos.map(photo => (
+          {visiblePhotos.length > 0 && (
+            <table
+              className="table is-striped is-narrow is-fullwidth"
+            >
+              <thead>
                 <tr>
-                  <td className="has-text-weight-bold">
-                    {photo.id}
-                  </td>
+                  <th>
+                    <span className="is-flex is-flex-wrap-nowrap">
+                      ID
 
-                  <td>
-                    {photo.title}
-                  </td>
-                  <td>
-                    {photo.album?.title}
-                  </td>
+                      <a href="#/">
+                        <span className="icon">
+                          <i data-cy="SortIcon" className="fas fa-sort" />
+                        </span>
+                      </a>
+                    </span>
+                  </th>
 
-                  <td className={cn(
-                    {
-                      'has-text-link': photo.owner?.sex === 'm',
-                      'has-text-danger': photo.owner?.sex === 'f',
-                    },
-                  )}
-                  >
-                    {photo.owner?.name}
-                  </td>
+                  <th>
+                    <span className="is-flex is-flex-wrap-nowrap">
+                      Photo name
+
+                      <a href="#/">
+                        <span className="icon">
+                          <i className="fas fa-sort-down" />
+                        </span>
+                      </a>
+                    </span>
+                  </th>
+
+                  <th>
+                    <span className="is-flex is-flex-wrap-nowrap">
+                      Album name
+
+                      <a href="#/">
+                        <span className="icon">
+                          <i className="fas fa-sort-up" />
+                        </span>
+                      </a>
+                    </span>
+                  </th>
+
+                  <th>
+                    <span className="is-flex is-flex-wrap-nowrap">
+                      User name
+
+                      <a href="#/">
+                        <span className="icon">
+                          <i className="fas fa-sort" />
+                        </span>
+                      </a>
+                    </span>
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+
+              <tbody>
+                {visiblePhotos.map(photo => (
+                  <tr>
+                    <td className="has-text-weight-bold">
+                      {photo.id}
+                    </td>
+
+                    <td>
+                      {photo.title}
+                    </td>
+                    <td>
+                      {photo.album?.title}
+                    </td>
+
+                    <td className={cn(
+                      {
+                        'has-text-link': photo.owner?.sex === 'm',
+                        'has-text-danger': photo.owner?.sex === 'f',
+                      },
+                    )}
+                    >
+                      {photo.owner?.name}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
       </div>
     </div>
