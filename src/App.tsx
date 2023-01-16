@@ -23,7 +23,7 @@ export const App: React.FC = () => {
   const [query, setQuery] = useState('');
   const [selectedUserId, setSelectedUserId] = useState(0);
   const [selectedAlbumsId, setSelectedAlbumsId] = useState<number[]>([]);
-  // const [sortBy, setSortBy] = useState('');
+  const [sortBy, setSortBy] = useState('');
 
   const handleQuery = (str: string) => setQuery(str);
   const clearQuery = () => setQuery('');
@@ -42,6 +42,86 @@ export const App: React.FC = () => {
     setQuery('');
     setSelectedUserId(0);
     setSelectedAlbumsId([]);
+    setSortBy('');
+  };
+
+  const handleSort = (str: string) => {
+    switch (str) {
+      case 'id':
+        setSortBy(prev => {
+          if (!prev) {
+            return 'id';
+          }
+
+          if (prev === 'id') {
+            return 'idRevers';
+          }
+
+          if (prev === 'idRevers') {
+            return '';
+          }
+
+          return '';
+        });
+        break;
+
+      case 'photoName':
+        setSortBy(prev => {
+          if (!prev) {
+            return 'photoName';
+          }
+
+          if (prev === 'photoName') {
+            return 'photoNameRevers';
+          }
+
+          if (prev === 'photoNameRevers') {
+            return '';
+          }
+
+          return '';
+        });
+        break;
+
+      case 'albumName':
+        setSortBy(prev => {
+          if (!prev) {
+            return 'albumName';
+          }
+
+          if (prev === 'albumName') {
+            return 'albumNameRevers';
+          }
+
+          if (prev === 'albumNameRevers') {
+            return '';
+          }
+
+          return '';
+        });
+        break;
+
+      case 'userName':
+        setSortBy(prev => {
+          if (!prev) {
+            return 'userName';
+          }
+
+          if (prev === 'userName') {
+            return 'userNameReverse';
+          }
+
+          if (prev === 'userNameReverse') {
+            return '';
+          }
+
+          return '';
+        });
+        break;
+
+      default:
+        break;
+    }
   };
 
   const visiblePhoto = photos.filter(photo => {
@@ -59,21 +139,52 @@ export const App: React.FC = () => {
     return isQueryInclude && isUserIdMatch && isAlbumMatch;
   });
 
-  // const sortedPhotos = visiblePhoto.sort((photo1, photo2) => {
-  //   switch (sortBy) {
-  //     case 'id':
-  //       return photo1.id - photo2.id;
-  //
-  //     case 'photoName':
-  //       return photo1.title.localeCompare(photo2.title);
-  //
-  //     case 'albbumName':
-  //       return photo1.album?.title.localeCompare(photo2.album.title);
-  //
-  //     default:
-  //       return 1;
-  //   }
-  // })
+  visiblePhoto.sort((photo1, photo2) => {
+    switch (sortBy) {
+      case 'id':
+        return photo1.id - photo2.id;
+
+      case 'photoName':
+        return photo1.title.localeCompare(photo2.title);
+
+      case 'albumName':
+        if (photo1.album && photo2.album) {
+          return photo1.album?.title.localeCompare(photo2.album?.title);
+        }
+
+        return 1;
+
+      case 'userName':
+        if (photo1.user && photo2.user) {
+          return photo1.user?.name.localeCompare(photo2.user?.name);
+        }
+
+        return 1;
+
+      case 'idRevers':
+        return photo2.id - photo1.id;
+
+      case 'photoNameRevers':
+        return photo2.title.localeCompare(photo1.title);
+
+      case 'albumNameRevers':
+        if (photo1.album && photo2.album) {
+          return photo2.album?.title.localeCompare(photo1.album?.title);
+        }
+
+        return 1;
+
+      case 'userNameReverse':
+        if (photo2.user && photo1.user) {
+          return photo2.user?.name.localeCompare(photo1.user?.name);
+        }
+
+        return 1;
+
+      default:
+        return 1;
+    }
+  });
 
   return (
     <div className="section">
@@ -178,49 +289,79 @@ export const App: React.FC = () => {
             >
               <thead>
                 <tr>
-                  <th>
+                  <th onClick={() => handleSort('id')}>
                     <span className="is-flex is-flex-wrap-nowrap">
                       ID
 
                       <a href="#/">
                         <span className="icon">
-                          <i data-cy="SortIcon" className="fas fa-sort" />
+                          <i
+                            data-cy="SortIcon"
+                            className={cn('fas',
+                              {
+                                'fa-sort': sortBy !== 'id'
+                                  && sortBy !== 'idReverse',
+                                'fa-sort-down': sortBy === 'id',
+                                'fa-sort-up': sortBy === 'idRevers',
+                              })}
+                          />
                         </span>
                       </a>
                     </span>
                   </th>
 
-                  <th>
+                  <th onClick={() => handleSort('photoName')}>
                     <span className="is-flex is-flex-wrap-nowrap">
                       Photo name
 
                       <a href="#/">
                         <span className="icon">
-                          <i className="fas fa-sort-down" />
+                          <i className={cn('fas',
+                            {
+                              'fa-sort': sortBy !== 'photoName'
+                                && sortBy !== 'photoNameReverse',
+                              'fa-sort-down': sortBy === 'photoName',
+                              'fa-sort-up': sortBy === 'photoNameRevers',
+                            })}
+                          />
                         </span>
                       </a>
                     </span>
                   </th>
 
-                  <th>
+                  <th onClick={() => handleSort('albumName')}>
                     <span className="is-flex is-flex-wrap-nowrap">
                       Album name
 
                       <a href="#/">
                         <span className="icon">
-                          <i className="fas fa-sort-up" />
+                          <i className={cn('fas',
+                            {
+                              'fa-sort': sortBy !== 'albumName'
+                                && sortBy !== 'albumNameReverse',
+                              'fa-sort-down': sortBy === 'albumName',
+                              'fa-sort-up': sortBy === 'albumNameRevers',
+                            })}
+                          />
                         </span>
                       </a>
                     </span>
                   </th>
 
-                  <th>
+                  <th onClick={() => handleSort('userName')}>
                     <span className="is-flex is-flex-wrap-nowrap">
                       User name
 
                       <a href="#/">
                         <span className="icon">
-                          <i className="fas fa-sort" />
+                          <i className={cn('fas',
+                            {
+                              'fa-sort': sortBy !== 'userName'
+                                && sortBy !== 'userNameReverse',
+                              'fa-sort-down': sortBy === 'userName',
+                              'fa-sort-up': sortBy === 'userNameReverse',
+                            })}
+                          />
                         </span>
                       </a>
                     </span>
