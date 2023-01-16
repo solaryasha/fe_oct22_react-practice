@@ -1,11 +1,33 @@
-import React from 'react';
+import React, { useState } from 'react';
+import cn from 'classnames';
 import './App.scss';
 
-// import usersFromServer from './api/users';
-// import photosFromServer from './api/photos';
-// import albumsFromServer from './api/albums';
+import { PreparedPhoto } from './types/PreparedPhoto';
+
+import usersFromServer from './api/users';
+import photosFromServer from './api/photos';
+import albumsFromServer from './api/albums';
+
+const preparedPhotos: PreparedPhoto[] = photosFromServer.map(photo => {
+  const album = albumsFromServer.find(photoAlbum => (
+    photoAlbum.id === photo.albumId
+  ));
+  const user = usersFromServer.find(albumsOwner => (
+    albumsOwner.id === album?.userId
+  ));
+
+  return (
+    {
+      ...photo,
+      album,
+      user,
+    }
+  );
+});
 
 export const App: React.FC = () => {
+  const [photos] = useState(preparedPhotos);
+
   return (
     <div className="section">
       <div className="container">
@@ -180,18 +202,25 @@ export const App: React.FC = () => {
             </thead>
 
             <tbody>
-              <tr>
-                <td className="has-text-weight-bold">
-                  1
-                </td>
+              {photos.map(photo => (
+                <tr key={photo.id}>
+                  <td className="has-text-weight-bold">
+                    {photo.id}
+                  </td>
 
-                <td>accusamus beatae ad facilis cum similique qui sunt</td>
-                <td>quidem molestiae enim</td>
+                  <td>{photo.title}</td>
+                  <td>{photo.album?.title}</td>
 
-                <td className="has-text-link">
-                  Max
-                </td>
-              </tr>
+                  <td
+                    className={cn(
+                      { 'has-text-link': photo.user?.sex === 'm' },
+                      { 'has-text-danger': photo.user?.sex === 'f' },
+                    )}
+                  >
+                    {photo.user?.name}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
