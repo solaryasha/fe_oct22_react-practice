@@ -26,7 +26,7 @@ const preparedPhotos: PreparedPhoto[] = photosFromServer.map(photo => {
 });
 
 export const App: React.FC = () => {
-  const [photos] = useState(preparedPhotos);
+  const [photos, setPhotos] = useState(preparedPhotos);
   const [selectedUserId, setSelectedUserId] = useState(0);
   const [filterQuery, setFilterQuery] = useState('');
   const [selectedAlbumsIds, setSelectedAlbumsIds] = useState<number[]>([]);
@@ -44,6 +44,42 @@ export const App: React.FC = () => {
       }
 
       return [...prevIds, albumId];
+    });
+  };
+
+  const moveUp = (photoId: number) => {
+    setPhotos(prev => {
+      const index = prev.findIndex(photo => photo.id === photoId);
+
+      if (index === 0) {
+        return prev;
+      }
+
+      const photosCopy = [...prev];
+      const temp = photosCopy[index];
+
+      photosCopy[index] = photosCopy[index - 1];
+      photosCopy[index - 1] = temp;
+
+      return photosCopy;
+    });
+  };
+
+  const moveDown = (photoId: number) => {
+    setPhotos(prev => {
+      const index = prev.findIndex(photo => photo.id === photoId);
+
+      if (index === prev.length - 1) {
+        return prev;
+      }
+
+      const photosCopy = [...prev];
+      const temp = photosCopy[index];
+
+      photosCopy[index] = photosCopy[index + 1];
+      photosCopy[index + 1] = temp;
+
+      return photosCopy;
     });
   };
 
@@ -222,6 +258,7 @@ export const App: React.FC = () => {
                         </a>
                       </span>
                     </th>
+                    <th> </th>
                   </tr>
                 </thead>
 
@@ -242,6 +279,23 @@ export const App: React.FC = () => {
                         )}
                       >
                         {photo.user?.name}
+                      </td>
+
+                      <td>
+                        <button
+                          type="button"
+                          className="button"
+                          onClick={() => moveUp(photo.id)}
+                        >
+                          &uarr;
+                        </button>
+                        <button
+                          type="button"
+                          className="button"
+                          onClick={() => moveDown(photo.id)}
+                        >
+                          &darr;
+                        </button>
                       </td>
                     </tr>
                   ))}
