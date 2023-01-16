@@ -1,11 +1,36 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './App.scss';
+import cn from 'classnames';
 
-// import usersFromServer from './api/users';
-// import photosFromServer from './api/photos';
-// import albumsFromServer from './api/albums';
+import usersFromServer from './api/users';
+import photosFromServer from './api/photos';
+import albumsFromServer from './api/albums';
+
+import { TotalAlbums, TotalPhotos } from './types/types';
+
+const getPreparedAlbums = (): TotalAlbums[] => {
+  return albumsFromServer.map(album => ({
+    ...album,
+    owner: usersFromServer.find(user => user.id === album.userId),
+  }));
+};
+
+const getPreparedPhotos = (): TotalPhotos[] => {
+  const preparedAlbums = getPreparedAlbums();
+
+  return photosFromServer.map(photo => {
+    const album = preparedAlbums.find(c => c.id === photo.albumId);
+
+    return {
+      ...photo,
+      album,
+    };
+  });
+};
 
 export const App: React.FC = () => {
+  const [photos] = useState(getPreparedPhotos());
+
   return (
     <div className="section">
       <div className="container">
@@ -180,18 +205,30 @@ export const App: React.FC = () => {
             </thead>
 
             <tbody>
-              <tr>
-                <td className="has-text-weight-bold">
-                  1
-                </td>
+              {photos.map(photo => (
+                <tr>
+                  <td className="has-text-weight-bold">
+                    {photo.id}
+                  </td>
 
-                <td>accusamus beatae ad facilis cum similique qui sunt</td>
-                <td>quidem molestiae enim</td>
+                  <td>
+                    {photo.title}
+                  </td>
 
-                <td className="has-text-link">
-                  Max
-                </td>
-              </tr>
+                  <td>
+                    {photo.album?.title}
+                  </td>
+
+                  <td
+                    className={cn({
+                      'has-text-link': photo.album?.owner?.sex === 'm',
+                      'has-text-danger': photo.album?.owner?.sex === 'f',
+                    })}
+                  >
+                    {photo.album?.owner?.name}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
