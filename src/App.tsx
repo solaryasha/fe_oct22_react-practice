@@ -35,7 +35,7 @@ export const App: React.FC = () => {
       ? selectedAlbumsId.includes(albumId)
       : true;
 
-    return isSearchMatch && isUserIdMatch;
+    return isSearchMatch && isUserIdMatch && isAlbumsMatch;
   });
 
   return (
