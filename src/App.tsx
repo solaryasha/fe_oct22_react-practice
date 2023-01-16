@@ -2,9 +2,22 @@ import React, { useState } from 'react';
 import classNames from 'classnames';
 import { getPreparedPhotos } from './api/getPreparedPhotos';
 import './App.scss';
+import users from './api/users';
 
 export const App: React.FC = () => {
   const [photos] = useState(getPreparedPhotos);
+  const [search, setSearch] = useState('');
+  const [selectedUserId, setSelectedUserId] = useState(0);
+
+  const visiblePhotos = photos.filter(photo => {
+    const isSearchMatch = photo.title.toLowerCase()
+      .includes(search.toLowerCase());
+    const isUserIdMatch = selectedUserId
+      ? photo.owner?.id === selectedUserId
+      : true;
+
+    return isSearchMatch && isUserIdMatch;
+  });
 
   return (
     <div className="section">
@@ -18,28 +31,26 @@ export const App: React.FC = () => {
             <p className="panel-tabs has-text-weight-bold">
               <a
                 href="#/"
+                className={classNames({
+                  'is-active': selectedUserId === 0,
+                })}
+                onClick={() => setSelectedUserId(0)}
               >
                 All
               </a>
 
-              <a
-                href="#/"
-              >
-                User 1
-              </a>
-
-              <a
-                href="#/"
-                className="is-active"
-              >
-                User 2
-              </a>
-
-              <a
-                href="#/"
-              >
-                User 3
-              </a>
+              {users.map(user => (
+                <a
+                  href="#/"
+                  className={classNames({
+                    'is-active': selectedUserId === user.id,
+                  })}
+                  onClick={() => setSelectedUserId(user.id)}
+                  key={user.id}
+                >
+                  {user.name}
+                </a>
+              ))}
             </p>
 
             <div className="panel-block">
@@ -48,7 +59,8 @@ export const App: React.FC = () => {
                   type="text"
                   className="input"
                   placeholder="Search"
-                  value="qwe"
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
                 />
 
                 <span className="icon is-left">
@@ -72,6 +84,19 @@ export const App: React.FC = () => {
               >
                 All
               </a>
+
+              {users.map(user => (
+                <a
+                  href="#/"
+                  className={classNames({
+                    'is-active': selectedUserId === user.id,
+                  })}
+                  onClick={() => setSelectedUserId(user.id)}
+                  key={user.id}
+                >
+                  {user.name}
+                </a>
+              ))}
 
               <a
                 className="button mr-2 my-1 is-info"
@@ -180,8 +205,8 @@ export const App: React.FC = () => {
             </thead>
 
             <tbody>
-              {photos.map(photo => (
-                <tr>
+              {visiblePhotos.map(photo => (
+                <tr key={photo.id}>
                   <td className="has-text-weight-bold">
                     {photo.id}
                   </td>
