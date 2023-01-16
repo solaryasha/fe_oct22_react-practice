@@ -1,11 +1,21 @@
 import React from 'react';
 import './App.scss';
 
-// import usersFromServer from './api/users';
-// import photosFromServer from './api/photos';
-// import albumsFromServer from './api/albums';
+import usersFromServer from './api/users';
+import photosFromServer from './api/photos';
+import albumsFromServer from './api/albums';
 
 export const App: React.FC = () => {
+  const photosWithAlbum = photosFromServer.map(photo => ({
+    ...photo,
+    album: albumsFromServer.find(album => album.id === photo.albumId),
+  }));
+
+  const photosWithAlbumAndUser = photosWithAlbum.map(photo => ({
+    ...photo,
+    user: usersFromServer.find(user => user.id === photo?.album?.userId),
+  }));
+
   return (
     <div className="section">
       <div className="container">
@@ -21,25 +31,15 @@ export const App: React.FC = () => {
               >
                 All
               </a>
-
-              <a
-                href="#/"
-              >
-                User 1
-              </a>
-
-              <a
-                href="#/"
-                className="is-active"
-              >
-                User 2
-              </a>
-
-              <a
-                href="#/"
-              >
-                User 3
-              </a>
+              {usersFromServer.map(user => (
+                <a
+                  key={user.id}
+                  href="#/"
+                  className="is-active"
+                >
+                  {user.name}
+                </a>
+              ))}
             </p>
 
             <div className="panel-block">
@@ -73,38 +73,17 @@ export const App: React.FC = () => {
                 All
               </a>
 
-              <a
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Album 1
-              </a>
+              {albumsFromServer.map(album => (
+                <a
+                  key={album.id}
+                  className="button mr-2 my-1 is-info"
+                  href="#/"
+                //               className="button mr-2 my-1 is-info"
+                >
+                  {album.title}
+                </a>
+              ))}
 
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 2
-              </a>
-
-              <a
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Album 3
-              </a>
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 4
-              </a>
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 5
-              </a>
             </div>
 
             <div className="panel-block">
@@ -180,18 +159,21 @@ export const App: React.FC = () => {
             </thead>
 
             <tbody>
-              <tr>
-                <td className="has-text-weight-bold">
-                  1
-                </td>
+              {photosWithAlbumAndUser.map(photo => (
+                <tr key={photo.id}>
+                  <td className="has-text-weight-bold">
+                    {photo.id}
+                  </td>
 
-                <td>accusamus beatae ad facilis cum similique qui sunt</td>
-                <td>quidem molestiae enim</td>
+                  <td>{photo.title}</td>
+                  <td>{photo.album?.title}</td>
 
-                <td className="has-text-link">
-                  Max
-                </td>
-              </tr>
+                  <td className="has-text-link">
+                    {photo.user?.name}
+                  </td>
+                </tr>
+              ))}
+
             </tbody>
           </table>
         </div>
