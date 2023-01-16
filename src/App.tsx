@@ -53,6 +53,12 @@ export const App: React.FC = () => {
     ));
   }
 
+  const resetAllFilters = () => {
+    visiblePhotos = photos;
+    setSelectedUserId(0);
+    setInputQuery('');
+  };
+
   return (
     <div className="section">
       <div className="container">
@@ -137,7 +143,7 @@ export const App: React.FC = () => {
               <a
                 href="#/"
                 className="button is-link is-outlined is-fullwidth"
-
+                onClick={resetAllFilters}
               >
                 Reset all filters
               </a>
@@ -146,87 +152,91 @@ export const App: React.FC = () => {
         </div>
 
         <div className="box table-container">
-          <p data-cy="NoMatchingMessage">
-            No photos matching selected criteria
-          </p>
+          {visiblePhotos.length
+            ? (
+              <table
+                className="table is-striped is-narrow is-fullwidth"
+              >
+                <thead>
+                  <tr>
+                    <th>
+                      <span className="is-flex is-flex-wrap-nowrap">
+                        ID
 
-          <table
-            className="table is-striped is-narrow is-fullwidth"
-          >
-            <thead>
-              <tr>
-                <th>
-                  <span className="is-flex is-flex-wrap-nowrap">
-                    ID
-
-                    <a href="#/">
-                      <span className="icon">
-                        <i data-cy="SortIcon" className="fas fa-sort" />
+                        <a href="#/">
+                          <span className="icon">
+                            <i data-cy="SortIcon" className="fas fa-sort" />
+                          </span>
+                        </a>
                       </span>
-                    </a>
-                  </span>
-                </th>
+                    </th>
 
-                <th>
-                  <span className="is-flex is-flex-wrap-nowrap">
-                    Photo name
+                    <th>
+                      <span className="is-flex is-flex-wrap-nowrap">
+                        Photo name
 
-                    <a href="#/">
-                      <span className="icon">
-                        <i className="fas fa-sort-down" />
+                        <a href="#/">
+                          <span className="icon">
+                            <i className="fas fa-sort-down" />
+                          </span>
+                        </a>
                       </span>
-                    </a>
-                  </span>
-                </th>
+                    </th>
 
-                <th>
-                  <span className="is-flex is-flex-wrap-nowrap">
-                    Album name
+                    <th>
+                      <span className="is-flex is-flex-wrap-nowrap">
+                        Album name
 
-                    <a href="#/">
-                      <span className="icon">
-                        <i className="fas fa-sort-up" />
+                        <a href="#/">
+                          <span className="icon">
+                            <i className="fas fa-sort-up" />
+                          </span>
+                        </a>
                       </span>
-                    </a>
-                  </span>
-                </th>
+                    </th>
 
-                <th>
-                  <span className="is-flex is-flex-wrap-nowrap">
-                    User name
+                    <th>
+                      <span className="is-flex is-flex-wrap-nowrap">
+                        User name
 
-                    <a href="#/">
-                      <span className="icon">
-                        <i className="fas fa-sort" />
+                        <a href="#/">
+                          <span className="icon">
+                            <i className="fas fa-sort" />
+                          </span>
+                        </a>
                       </span>
-                    </a>
-                  </span>
-                </th>
-              </tr>
-            </thead>
+                    </th>
+                  </tr>
+                </thead>
 
-            <tbody>
-              {visiblePhotos.map(photo => (
-                <tr key={photo.id}>
-                  <td className="has-text-weight-bold">
-                    {photo.id}
-                  </td>
+                <tbody>
+                  {visiblePhotos.map(photo => (
+                    <tr key={photo.id}>
+                      <td className="has-text-weight-bold">
+                        {photo.id}
+                      </td>
 
-                  <td>{photo.title}</td>
-                  <td>{photo.album?.title}</td>
+                      <td>{photo.title}</td>
+                      <td>{photo.album?.title}</td>
 
-                  <td
-                    className={classNames({
-                      'has-text-link': photo.user?.sex === 'm',
-                      'has-text-danger': photo.user?.sex === 'f',
-                    })}
-                  >
-                    {photo.user?.name}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                      <td
+                        className={classNames({
+                          'has-text-link': photo.user?.sex === 'm',
+                          'has-text-danger': photo.user?.sex === 'f',
+                        })}
+                      >
+                        {photo.user?.name}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )
+            : (
+              <p data-cy="NoMatchingMessage">
+                No photos matching selected criteria
+              </p>
+            )}
         </div>
       </div>
     </div>
