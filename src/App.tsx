@@ -1,11 +1,45 @@
-import React from 'react';
 import './App.scss';
+import classNames from 'classnames';
+import React, { useState } from 'react';
 
-// import usersFromServer from './api/users';
-// import photosFromServer from './api/photos';
-// import albumsFromServer from './api/albums';
+import { FullPhoto } from './types/PreparedTypes';
+
+import users from './api/users';
+import photos from './api/photos';
+import albums from './api/albums';
+
+const allPhoto: FullPhoto[] = photos.map(photo => {
+  const album = albums.find(alb => alb.id === photo.albumId);
+  const user = users.find(us => us.id === album?.userId);
+
+  return {
+    ...photo,
+    album,
+    user,
+  };
+});
 
 export const App: React.FC = () => {
+  const [photosF] = useState(allPhoto);
+  const [selectedUserId, setSelectedUserId] = useState(0);
+  const [query, setQuery] = useState('');
+  const [selectedAlbumId, setSelectedAlbumId] = useState<number[]>([]);
+
+  const visibleProducts = photosF.filter(photo => {
+    const prepQuery = query.toLowerCase();
+    const isQueryInclude = photo.title.toLowerCase().includes(prepQuery);
+
+    const isUserIdMatch = selectedUserId !== 0
+      ? photo.user?.id === selectedUserId
+      : true;
+
+    const isAlbumMatch = selectedAlbumId.length
+      ? selectedAlbumId.includes(photo.albumId)
+      : true;
+
+    return isQueryInclude && isUserIdMatch && isAlbumMatch;
+  });
+
   return (
     <div className="section">
       <div className="container">
@@ -18,28 +52,23 @@ export const App: React.FC = () => {
             <p className="panel-tabs has-text-weight-bold">
               <a
                 href="#/"
+                onClick={() => setSelectedUserId(0)}
               >
                 All
               </a>
 
-              <a
-                href="#/"
-              >
-                User 1
-              </a>
+              {users.map(user => (
+                <a
+                  href="#/"
+                  className={classNames(
+                    { 'is-active': user.id === selectedUserId },
+                  )}
+                  onClick={() => setSelectedUserId(user.id)}
+                >
+                  {`User ${user.id}`}
+                </a>
+              ))}
 
-              <a
-                href="#/"
-                className="is-active"
-              >
-                User 2
-              </a>
-
-              <a
-                href="#/"
-              >
-                User 3
-              </a>
             </p>
 
             <div className="panel-block">
@@ -48,20 +77,24 @@ export const App: React.FC = () => {
                   type="text"
                   className="input"
                   placeholder="Search"
-                  value="qwe"
+                  value={query}
+                  onChange={(event) => setQuery(event.target.value)}
                 />
 
                 <span className="icon is-left">
                   <i className="fas fa-search" aria-hidden="true" />
                 </span>
+                {query && (
+                  <span className="icon is-right">
+                    {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
+                    <button
+                      type="button"
+                      className="delete"
+                      onClick={() => setQuery('')}
+                    />
+                  </span>
 
-                <span className="icon is-right">
-                  {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
-                  <button
-                    type="button"
-                    className="delete"
-                  />
-                </span>
+                )}
               </p>
             </div>
 
@@ -69,42 +102,20 @@ export const App: React.FC = () => {
               <a
                 href="#/"
                 className="button is-success mr-6 is-outlined"
+                onClick={() => setSelectedAlbumId(0)}
               >
                 All
               </a>
 
-              <a
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Album 1
-              </a>
-
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 2
-              </a>
-
-              <a
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Album 3
-              </a>
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 4
-              </a>
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 5
-              </a>
+              {albums.map(album => (
+                <a
+                  className="button mr-2 my-1 is-info"
+                  href="#/"
+                  onClick={() => selectedAlbumId === album.id}
+                >
+                  {`Album ${album.id}`}
+                </a>
+              ))}
             </div>
 
             <div className="panel-block">
@@ -180,18 +191,24 @@ export const App: React.FC = () => {
             </thead>
 
             <tbody>
-              <tr>
-                <td className="has-text-weight-bold">
-                  1
-                </td>
+              {visibleProducts.map(photo => (
+                <tr key={photo.id}>
+                  <td className="has-text-weight-bold">
+                    {photo.id}
+                  </td>
 
-                <td>accusamus beatae ad facilis cum similique qui sunt</td>
-                <td>quidem molestiae enim</td>
+                  <td>{photo.title}</td>
+                  <td>{photo.album?.id}</td>
 
-                <td className="has-text-link">
-                  Max
-                </td>
-              </tr>
+                  <td className={photo.user?.sex === 'm' ? (
+                    'has-text-link'
+                  ) : (
+                    'has-text-danger')}
+                  >
+                    {photo.user?.name}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
