@@ -1,11 +1,32 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './App.scss';
 
-// import usersFromServer from './api/users';
-// import photosFromServer from './api/photos';
-// import albumsFromServer from './api/albums';
+import classNames from 'classnames';
+
+import usersFromServer from './api/users';
+import photosFromServer from './api/photos';
+import albumsFromServer from './api/albums';
+
+import { Album, PreparedPhotos, User } from './types/types';
+
+const getPreparedPhotos = (): PreparedPhotos[] => {
+  return photosFromServer.map(photo => {
+    const foundAlbum = albumsFromServer.find(album => (
+      album.id === photo.albumId)) as Album;
+    const foundUser = usersFromServer.find(user => (
+      user.id === foundAlbum?.userId)) as User;
+
+    return ({
+      ...photo,
+      albumtitle: foundAlbum?.title,
+      username: foundUser.name,
+    });
+  });
+};
 
 export const App: React.FC = () => {
+  const [photos] = useState(getPreparedPhotos);
+
   return (
     <div className="section">
       <div className="container">
@@ -180,18 +201,31 @@ export const App: React.FC = () => {
             </thead>
 
             <tbody>
-              <tr>
-                <td className="has-text-weight-bold">
-                  1
-                </td>
+              {photos.map(photo => {
+                const foundAlbum = albumsFromServer.find(album => (
+                  album.id === photo.albumId));
+                const foundUser = usersFromServer.find(user => (
+                  user.id === foundAlbum?.userId));
 
-                <td>accusamus beatae ad facilis cum similique qui sunt</td>
-                <td>quidem molestiae enim</td>
+                return (
+                  <tr key={photo.id}>
+                    <td className="has-text-weight-bold">
+                      {photo.id}
+                    </td>
 
-                <td className="has-text-link">
-                  Max
-                </td>
-              </tr>
+                    <td>{photo.username}</td>
+                    <td>{photo.title}</td>
+
+                    <td className={classNames({
+                      'has-text-link': foundUser?.sex === 'm',
+                      'has-text-danger': foundUser?.sex === 'w',
+                    })}
+                    >
+                      {photo.username}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
