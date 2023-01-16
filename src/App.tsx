@@ -24,6 +24,29 @@ export const App: React.FC = () => {
   const [photos, setPhotos] = useState<PhotoFull[]>([]);
   const [SearchQuery, setSearchQuery] = useState<string>('');
   const [selectedUserId, setSelectedUserId] = useState<number>(0);
+  const [selectedAlbumsIds, setSelectedAlbumsIds] = useState<number[]>([]);
+
+  const onSelectAlbumFilter = (id: number) => {
+    setSelectedAlbumsIds((prev) => {
+      if (prev.includes(id)) {
+        return prev.filter(el => el !== id);
+      }
+
+      return [...prev, id];
+    });
+  };
+
+  const clearSelectedAlbums = () => {
+    setSelectedAlbumsIds([]);
+  };
+
+  const clearFilters = () => {
+    clearSelectedAlbums();
+    setSearchQuery('');
+    setSelectedUserId(0);
+  };
+
+
 
   const visiblePhotos = photos.filter(photo => {
     const searchQueryMathed = photo.title.toLowerCase().includes(
@@ -34,7 +57,11 @@ export const App: React.FC = () => {
       ? photo.owner?.id === selectedUserId
       : true;
 
-    return searchQueryMathed && isSelectedUserMathed;
+    const isAlbumMatch = selectedAlbumsIds.length
+      ? selectedAlbumsIds.includes(photo.album?.id || 0)
+      : true;
+
+    return searchQueryMathed && isSelectedUserMathed && isAlbumMatch;
   });
 
   useEffect(() => {
@@ -99,25 +126,28 @@ export const App: React.FC = () => {
             <div className="panel-block is-flex-wrap-wrap">
               <a
                 href="#/"
-                className="button is-success mr-6 is-outlined"
+                className={`button is-success mr-6 ${setSelectedAlbumsIds.length
+                  ? 'is-outlined'
+                  : ''}`}
+                onClick={clearSelectedAlbums}
               >
                 All
               </a>
               {albums.map(album => (
                 <a
-                  className="button mr-2 my-1 is-info"
+                  className={`button mr-2 my-1  ${selectedAlbumsIds.includes(album.id) ? 'is-info' : ''}`}
                   href="#/"
+                  onClick={() => onSelectAlbumFilter(album.id)}
                 >
                   {album.title}
                 </a>
               ))}
             </div>
-
             <div className="panel-block">
               <a
                 href="#/"
                 className="button is-link is-outlined is-fullwidth"
-
+                onClick={clearFilters}
               >
                 Reset all filters
               </a>
