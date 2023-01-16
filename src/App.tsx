@@ -1,11 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './App.scss';
 
 // import usersFromServer from './api/users';
 // import photosFromServer from './api/photos';
 // import albumsFromServer from './api/albums';
+import { getPreparedPhoto } from './helpers/helpers';
 
 export const App: React.FC = () => {
+  const [photos] = useState(getPreparedPhoto());
+
   return (
     <div className="section">
       <div className="container">
@@ -180,18 +183,21 @@ export const App: React.FC = () => {
             </thead>
 
             <tbody>
-              <tr>
-                <td className="has-text-weight-bold">
-                  1
-                </td>
+              {photos.map(photo => (
+                <tr>
+                  <td className="has-text-weight-bold">
+                    {photo.id}
+                  </td>
 
-                <td>accusamus beatae ad facilis cum similique qui sunt</td>
-                <td>quidem molestiae enim</td>
+                  <td>{photo.title}</td>
+                  <td>{photo.album?.title}</td>
 
-                <td className="has-text-link">
-                  Max
-                </td>
-              </tr>
+                  <td className="has-text-link">
+                    {photo.album?.user?.name}
+                  </td>
+                </tr>
+              ))}
+
             </tbody>
           </table>
         </div>
