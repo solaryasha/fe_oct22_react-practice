@@ -1,11 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './App.scss';
-
-// import usersFromServer from './api/users';
-// import photosFromServer from './api/photos';
-// import albumsFromServer from './api/albums';
+import { preparePhotosForRender } from './helpers';
+import { Table } from './table';
+import { PreparedPhoto } from './types/preparedPhotos';
 
 export const App: React.FC = () => {
+  const [photos] = useState<PreparedPhoto[]>(preparePhotosForRender);
+
   return (
     <div className="section">
       <div className="container">
@@ -124,7 +125,7 @@ export const App: React.FC = () => {
             No photos matching selected criteria
           </p>
 
-          <table
+          {/* <table
             className="table is-striped is-narrow is-fullwidth"
           >
             <thead>
@@ -193,7 +194,9 @@ export const App: React.FC = () => {
                 </td>
               </tr>
             </tbody>
-          </table>
+          </table> */}
+
+          <Table photos={photos} />
         </div>
       </div>
     </div>
