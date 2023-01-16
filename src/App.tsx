@@ -42,6 +42,11 @@ export const App: React.FC = () => {
     { query, selectedUserId },
   );
 
+  const reset = () => {
+    setQuery('');
+    setSelectedUserId(0);
+  };
+
   return (
     <div className="section">
       <div className="container">
@@ -118,18 +123,13 @@ export const App: React.FC = () => {
                 </a>
               ))}
 
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 2
-              </a>
             </div>
 
             <div className="panel-block">
               <a
                 href="#/"
                 className="button is-link is-outlined is-fullwidth"
+                onClick={reset}
 
               >
                 Reset all filters
