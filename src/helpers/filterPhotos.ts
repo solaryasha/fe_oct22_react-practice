@@ -1,4 +1,4 @@
-import { PhototFull } from '../types/types'
+import { PhototFull } from '../types/types';
 
 interface Filters {
   searchQuery: string,
