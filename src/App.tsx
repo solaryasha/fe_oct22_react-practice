@@ -4,7 +4,7 @@ import albums from './api/albums';
 import users from './api/users';
 import './App.scss';
 import { getPreparedPhotos } from './api/getPreparedphotos';
-import { filterPhotos } from './filterPhotos';
+// import { filterPhotos } from './filterPhotos';
 
 export const App: React.FC = () => {
   const [photos] = useState(getPreparedPhotos);
