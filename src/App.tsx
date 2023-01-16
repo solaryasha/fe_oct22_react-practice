@@ -21,10 +21,18 @@ const allDataFromServer = photosFromServer.map(photo => {
 });
 
 export const App: React.FC = () => {
-  const [photos] = useState(allDataFromServer);
+  const [photos, setPhotos] = useState(allDataFromServer);
   const [query, setQuery] = useState('');
   const [filterBy, setFilter] = useState('All');
   const [selectedAlbums, setSelectedAlbums] = useState<string[]>([]);
+
+  const moveUp = () => { // index: number
+    setPhotos(photos);
+  };
+
+  const moveDown = () => { // index: number
+    setPhotos(photos);
+  };
 
   const photosFilter = () => {
     const newQuery = query.toLowerCase().trim();
@@ -204,7 +212,7 @@ export const App: React.FC = () => {
                 </thead>
 
                 <tbody>
-                  {visiblePhotos.map(photo => {
+                  {visiblePhotos.map((photo) => { // index
                     return (
                       <tr key={photo.id}>
                         <td>{photo.id}</td>
@@ -217,6 +225,22 @@ export const App: React.FC = () => {
                           )}
                         >
                           {photo.userName}
+                        </td>
+                        <td>
+                          <button
+                            type="button"
+                            className="button is-danger mr-4"
+                            onClick={() => moveDown()} // index
+                          >
+                            &darr;
+                          </button>
+                          <button
+                            type="button"
+                            className="button is-success"
+                            onClick={() => moveUp()} // index
+                          >
+                            &uarr;
+                          </button>
                         </td>
                       </tr>
                     );
