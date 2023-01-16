@@ -30,7 +30,7 @@ const preparedPhotos: PreparedPhotos[] = photosFromServer.map(photo => {
 export const App: React.FC = () => {
   const [photos] = useState(preparedPhotos);
   const [selectedUserID, setSelectedUserID] = useState(0);
-  // const [query, setQuery] = useState('');
+  const [query, setQuery] = useState('');
 
   let visiblePhotos = [...photos];
 
@@ -38,6 +38,20 @@ export const App: React.FC = () => {
     visiblePhotos = visiblePhotos.filter(photo => (
       photo.user?.id === selectedUserID
     ));
+  }
+
+  if (query) {
+    visiblePhotos = visiblePhotos.filter(photo => {
+      const productName = photo.title.toLowerCase();
+
+      const normalizedQuery = query
+        .toLowerCase()
+        .split(' ')
+        .filter(Boolean)
+        .join(' ');
+
+      return productName.includes(normalizedQuery);
+    });
   }
 
   return (
@@ -84,7 +98,8 @@ export const App: React.FC = () => {
                   type="text"
                   className="input"
                   placeholder="Search"
-                  value="qwe"
+                  value={query}
+                  onChange={(event) => setQuery(event.currentTarget.value)}
                 />
 
                 <span className="icon is-left">
@@ -92,11 +107,15 @@ export const App: React.FC = () => {
                 </span>
 
                 <span className="icon is-right">
-                  {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
-                  <button
-                    type="button"
-                    className="delete"
-                  />
+                  {query && (
+                    // eslint-disable-next-line jsx-a11y/control-has-associated-label
+                    <button
+                      data-cy="ClearButton"
+                      type="button"
+                      className="delete"
+                      onClick={() => setQuery('')}
+                    />
+                  )}
                 </span>
               </p>
             </div>
@@ -147,7 +166,10 @@ export const App: React.FC = () => {
               <a
                 href="#/"
                 className="button is-link is-outlined is-fullwidth"
-
+                onClick={() => {
+                  setQuery('');
+                  setSelectedUserID(0);
+                }}
               >
                 Reset all filters
               </a>
@@ -156,89 +178,94 @@ export const App: React.FC = () => {
         </div>
 
         <div className="box table-container">
-          <p data-cy="NoMatchingMessage">
-            No photos matching selected criteria
-          </p>
+          {visiblePhotos.length === 0 && (
+            <p data-cy="NoMatchingMessage">
+              No photos matching selected criteria
+            </p>
+          )}
 
-          <table
-            className="table is-striped is-narrow is-fullwidth"
-          >
-            <thead>
-              <tr>
-                <th>
-                  <span className="is-flex is-flex-wrap-nowrap">
-                    ID
-
-                    <a href="#/">
-                      <span className="icon">
-                        <i data-cy="SortIcon" className="fas fa-sort" />
-                      </span>
-                    </a>
-                  </span>
-                </th>
-
-                <th>
-                  <span className="is-flex is-flex-wrap-nowrap">
-                    Photo name
-
-                    <a href="#/">
-                      <span className="icon">
-                        <i className="fas fa-sort-down" />
-                      </span>
-                    </a>
-                  </span>
-                </th>
-
-                <th>
-                  <span className="is-flex is-flex-wrap-nowrap">
-                    Album name
-
-                    <a href="#/">
-                      <span className="icon">
-                        <i className="fas fa-sort-up" />
-                      </span>
-                    </a>
-                  </span>
-                </th>
-
-                <th>
-                  <span className="is-flex is-flex-wrap-nowrap">
-                    User name
-
-                    <a href="#/">
-                      <span className="icon">
-                        <i className="fas fa-sort" />
-                      </span>
-                    </a>
-                  </span>
-                </th>
-              </tr>
-            </thead>
-
-            <tbody>
-              {visiblePhotos.map(photo => (
+          {visiblePhotos.length > 0 && (
+            <table
+              className="table is-striped is-narrow is-fullwidth"
+            >
+              <thead>
                 <tr>
-                  <td className="has-text-weight-bold">
-                    {photo.id}
-                  </td>
+                  <th>
+                    <span className="is-flex is-flex-wrap-nowrap">
+                      ID
 
-                  <td>{photo.title}</td>
-                  <td>{photo.album?.title}</td>
+                      <a href="#/">
+                        <span className="icon">
+                          <i data-cy="SortIcon" className="fas fa-sort" />
+                        </span>
+                      </a>
+                    </span>
+                  </th>
 
-                  <td
-                    className={classNames(
-                      {
-                        'has-text-link': photo.user?.sex === 'm',
-                        'has-text-danger': photo.user?.sex === 'f',
-                      },
-                    )}
-                  >
-                    {photo.user?.name}
-                  </td>
+                  <th>
+                    <span className="is-flex is-flex-wrap-nowrap">
+                      Photo name
+
+                      <a href="#/">
+                        <span className="icon">
+                          <i className="fas fa-sort-down" />
+                        </span>
+                      </a>
+                    </span>
+                  </th>
+
+                  <th>
+                    <span className="is-flex is-flex-wrap-nowrap">
+                      Album name
+
+                      <a href="#/">
+                        <span className="icon">
+                          <i className="fas fa-sort-up" />
+                        </span>
+                      </a>
+                    </span>
+                  </th>
+
+                  <th>
+                    <span className="is-flex is-flex-wrap-nowrap">
+                      User name
+
+                      <a href="#/">
+                        <span className="icon">
+                          <i className="fas fa-sort" />
+                        </span>
+                      </a>
+                    </span>
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+
+              <tbody>
+                {visiblePhotos.map(photo => (
+                  <tr>
+                    <td className="has-text-weight-bold">
+                      {photo.id}
+                    </td>
+
+                    <td>{photo.title}</td>
+                    <td>{photo.album?.title}</td>
+
+                    <td
+                      className={classNames(
+                        {
+                          'has-text-link': photo.user?.sex === 'm',
+                          'has-text-danger': photo.user?.sex === 'f',
+                        },
+                      )}
+                    >
+                      {photo.user?.name}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+
         </div>
       </div>
     </div>
