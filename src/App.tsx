@@ -1,11 +1,13 @@
-import React from 'react';
-import './App.scss';
+import React, { useState } from 'react';
+import cn from 'classnames';
 
-// import usersFromServer from './api/users';
-// import photosFromServer from './api/photos';
-// import albumsFromServer from './api/albums';
+import './App.scss';
+import { FullPhoto } from './types/types';
+import { getPrepPhotos } from './api/getPrepPhotos';
 
 export const App: React.FC = () => {
+  const [photos] = useState<FullPhoto[]>(getPrepPhotos);
+
   return (
     <div className="section">
       <div className="container">
@@ -180,18 +182,30 @@ export const App: React.FC = () => {
             </thead>
 
             <tbody>
-              <tr>
-                <td className="has-text-weight-bold">
-                  1
-                </td>
+              {photos.map(photo => (
+                <tr>
+                  <td className="has-text-weight-bold">
+                    {photo.id}
+                  </td>
 
-                <td>accusamus beatae ad facilis cum similique qui sunt</td>
-                <td>quidem molestiae enim</td>
+                  <td>
+                    {photo.title}
+                  </td>
+                  <td>
+                    {photo.album?.title}
+                  </td>
 
-                <td className="has-text-link">
-                  Max
-                </td>
-              </tr>
+                  <td className={cn(
+                    {
+                      'has-text-link': photo.owner?.sex === 'm',
+                      'has-text-danger': photo.owner?.sex === 'f',
+                    },
+                  )}
+                  >
+                    {photo.owner?.name}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
