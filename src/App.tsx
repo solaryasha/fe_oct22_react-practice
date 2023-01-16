@@ -1,11 +1,67 @@
-import React from 'react';
+import React, { useState } from 'react';
+import cn from 'classnames';
 import './App.scss';
 
-// import usersFromServer from './api/users';
-// import photosFromServer from './api/photos';
-// import albumsFromServer from './api/albums';
+import usersFromServer from './api/users';
+import photosFromServer from './api/photos';
+import albumsFromServer from './api/albums';
+import { PhotosFull } from './types/Photo';
+
+const photosFull: PhotosFull[] = photosFromServer.map(photo => {
+  const album = albumsFromServer
+    .find(albumElem => albumElem.id === photo.albumId);
+
+  const user = usersFromServer.find(userElem => userElem.id === album?.userId);
+
+  return {
+    ...photo,
+    album,
+    user,
+  };
+});
 
 export const App: React.FC = () => {
+  const [photos] = useState(photosFull);
+  const [selectedUserId, setSelectedUserId] = useState(0);
+  const [query, setQuery] = useState('');
+  const [selectedAlbums, setSelectedAlbums] = useState<number[]>([]);
+
+  const handleSelectedAlbums = (newId: number) => {
+    setSelectedAlbums(state => {
+      if (state.includes(newId)) {
+        return state.filter(elem => elem !== newId);
+      }
+
+      return [...state, newId];
+    });
+  };
+
+  const visiblePhotos = photos.filter(photo => {
+    const queryPrepared = query.toLowerCase().trim();
+    const photoTitle = photo.title.toLowerCase();
+    const albumId = photo.album?.id || 0;
+
+    const isQueryMatched = photoTitle.includes(queryPrepared);
+
+    const isSelectedUserMatched = selectedUserId !== 0
+      ? selectedUserId === photo.user?.id
+      : true;
+
+    const isSelectedAlbumsMatched = selectedAlbums.length
+      ? selectedAlbums.includes(albumId)
+      : true;
+
+    return isQueryMatched
+      && isSelectedUserMatched
+      && isSelectedAlbumsMatched;
+  });
+
+  const handleClearFilters = () => {
+    setSelectedUserId(0);
+    setQuery('');
+    setSelectedAlbums([]);
+  };
+
   return (
     <div className="section">
       <div className="container">
@@ -18,28 +74,25 @@ export const App: React.FC = () => {
             <p className="panel-tabs has-text-weight-bold">
               <a
                 href="#/"
+                onClick={() => setSelectedUserId(0)}
+                className={cn({
+                  'is-active': !selectedUserId,
+                })}
               >
                 All
               </a>
-
-              <a
-                href="#/"
-              >
-                User 1
-              </a>
-
-              <a
-                href="#/"
-                className="is-active"
-              >
-                User 2
-              </a>
-
-              <a
-                href="#/"
-              >
-                User 3
-              </a>
+              {usersFromServer.map(user => (
+                <a
+                  href="#/"
+                  key={user.id}
+                  onClick={() => setSelectedUserId(user.id)}
+                  className={cn({
+                    'is-active': selectedUserId === user.id,
+                  })}
+                >
+                  { user.name }
+                </a>
+              ))}
             </p>
 
             <div className="panel-block">
@@ -48,70 +101,62 @@ export const App: React.FC = () => {
                   type="text"
                   className="input"
                   placeholder="Search"
-                  value="qwe"
+                  value={query}
+                  onChange={event => setQuery(event.target.value)}
                 />
 
                 <span className="icon is-left">
                   <i className="fas fa-search" aria-hidden="true" />
                 </span>
 
-                <span className="icon is-right">
-                  {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
-                  <button
-                    type="button"
-                    className="delete"
-                  />
-                </span>
+                {query && (
+                  <span className="icon is-right">
+                    {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
+                    <button
+                      type="button"
+                      className="delete"
+                      onClick={() => setQuery('')}
+                    />
+                  </span>
+                )}
               </p>
             </div>
 
             <div className="panel-block is-flex-wrap-wrap">
               <a
                 href="#/"
-                className="button is-success mr-6 is-outlined"
+                className={cn(
+                  'button is-success mr-6',
+                  {
+                    'is-outlined': selectedAlbums.length !== 0,
+                  },
+                )}
+                onClick={() => setSelectedAlbums([])}
               >
                 All
               </a>
-
-              <a
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Album 1
-              </a>
-
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 2
-              </a>
-
-              <a
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Album 3
-              </a>
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 4
-              </a>
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 5
-              </a>
+              {albumsFromServer.map(album => (
+                <a
+                  className={cn(
+                    'button mr-2 my-1',
+                    {
+                      'is-info': selectedAlbums.includes(album.id),
+                    },
+                  )}
+                  href="#/"
+                  key={album.id}
+                  onClick={() => handleSelectedAlbums(album.id)}
+                >
+                  {`Album ${album.id}`}
+                </a>
+              ))}
             </div>
 
             <div className="panel-block">
               <a
                 href="#/"
                 className="button is-link is-outlined is-fullwidth"
-
+                onClick={handleClearFilters}
               >
                 Reset all filters
               </a>
@@ -120,9 +165,11 @@ export const App: React.FC = () => {
         </div>
 
         <div className="box table-container">
-          <p data-cy="NoMatchingMessage">
-            No photos matching selected criteria
-          </p>
+          {visiblePhotos.length === 0 && (
+            <p data-cy="NoMatchingMessage">
+              No results
+            </p>
+          )}
 
           <table
             className="table is-striped is-narrow is-fullwidth"
@@ -180,18 +227,24 @@ export const App: React.FC = () => {
             </thead>
 
             <tbody>
-              <tr>
-                <td className="has-text-weight-bold">
-                  1
-                </td>
+              {visiblePhotos.map(photo => (
+                <tr key={photo.id}>
+                  <td className="has-text-weight-bold">
+                    { photo.id }
+                  </td>
 
-                <td>accusamus beatae ad facilis cum similique qui sunt</td>
-                <td>quidem molestiae enim</td>
+                  <td>{ photo.title }</td>
+                  <td>{ photo.album?.title }</td>
 
-                <td className="has-text-link">
-                  Max
-                </td>
-              </tr>
+                  <td className={cn({
+                    'has-text-link': photo.user?.sex === 'm',
+                    'has-text-danger': photo.user?.sex === 'f',
+                  })}
+                  >
+                    { photo.user?.name }
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
