@@ -7,9 +7,11 @@ type PhotoTableProps = {
 export const PhotoTable: FC<PhotoTableProps> = ({ photos }) => {
   return (
     <div className="box table-container">
-      <p data-cy="NoMatchingMessage">
-        No photos matching selected criteria
-      </p>
+      {photos.length === 0 && (
+        <p data-cy="NoMatchingMessage">
+          No photos matching selected criteria
+        </p>
+      )}
 
       <table
         className="table is-striped is-narrow is-fullwidth"
