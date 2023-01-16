@@ -35,6 +35,7 @@ export const App: React.FC = () => {
   const [photos] = useState(getPreparedPhotos);
   const [selectedUserId, setSelectedUserId] = useState(0);
   const [query, setQuery] = useState('');
+  const [selectedAlbumsId, setSelectedAlbumsId] = useState<number[]>([]);
 
   const normalizedQuery = query.toLowerCase().trim();
 
@@ -48,12 +49,28 @@ export const App: React.FC = () => {
       ? photo.user?.id === selectedUserId
       : true;
 
-    return isUserIdSelected && isQueryMatch;
+    const isAlbumMatch = selectedAlbumsId.length
+      ? selectedAlbumsId.includes(photo.albumId)
+      : true;
+
+    return isUserIdSelected && isQueryMatch && isAlbumMatch;
   });
 
   const resetAllFilters = () => {
     setSelectedUserId(0);
     setQuery('');
+    setSelectedAlbumsId([]);
+  };
+
+  const handleSelectAlbum = (albumId: number) => {
+    if (selectedAlbumsId.includes(albumId)) {
+      setSelectedAlbumsId(selectedAlbumsId.filter(id => id !== albumId));
+    } else {
+      setSelectedAlbumsId(albumsIds => [
+        ...albumsIds,
+        albumId,
+      ]);
+    }
   };
 
   return (
@@ -116,43 +133,28 @@ export const App: React.FC = () => {
             <div className="panel-block is-flex-wrap-wrap">
               <a
                 href="#/"
-                className="button is-success mr-6 is-outlined"
+                className={cn(
+                  'button is-success mr-6',
+                  { 'is-outlined': selectedAlbumsId.length },
+                )}
+                onClick={() => setSelectedAlbumsId([])}
               >
                 All
               </a>
 
-              <a
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Album 1
-              </a>
-
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 2
-              </a>
-
-              <a
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Album 3
-              </a>
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 4
-              </a>
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 5
-              </a>
+              {albumsFromServer.map(album => (
+                <a
+                  key={album.id}
+                  className={cn(
+                    'button mr-2 my-1',
+                    { 'is-info': selectedAlbumsId.includes(album.id) },
+                  )}
+                  href="#/"
+                  onClick={() => handleSelectAlbum(album.id)}
+                >
+                  {`Album ${album.id}`}
+                </a>
+              ))}
             </div>
 
             <div className="panel-block">
