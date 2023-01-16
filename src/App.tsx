@@ -1,11 +1,55 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './App.scss';
+import classNames from 'classnames';
+import { PhotoFull } from './types/Types';
 
-// import usersFromServer from './api/users';
-// import photosFromServer from './api/photos';
-// import albumsFromServer from './api/albums';
+import usersFromServer from './api/users';
+import photosFromServer from './api/photos';
+import albumsFromServer from './api/albums';
+
+const PreparedPhotos: PhotoFull[] = (
+  photosFromServer.map(photo => {
+    const album = albumsFromServer.find(a => a.id === photo.albumId);
+    const user = usersFromServer.find(u => u.id === album?.userId);
+
+    return {
+      ...photo,
+      album,
+      user,
+    };
+  })
+);
 
 export const App: React.FC = () => {
+  const [photoSearch, setPhotoSearch] = useState('');
+  const [selectedUser, setSelectedUser] = useState(0);
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = event.target;
+
+    setPhotoSearch(value);
+  };
+
+  const visiblePhotos = PreparedPhotos.filter(photo => {
+    const title = photo.title.toLowerCase();
+    const editedPhotoName = photoSearch.toLowerCase().trim();
+
+    const isTitleMatch = title.includes(editedPhotoName);
+    const isUserIdMatch = selectedUser !== 0
+      ? photo.album?.userId === selectedUser
+      : true;
+
+    return isTitleMatch && isUserIdMatch;
+  });
+
+  const reset = () => {
+    setPhotoSearch('');
+  };
+
+  function handleDelete() {
+    reset();
+  }
+
   return (
     <div className="section">
       <div className="container">
@@ -18,28 +62,25 @@ export const App: React.FC = () => {
             <p className="panel-tabs has-text-weight-bold">
               <a
                 href="#/"
+                className={classNames(
+                  { 'is-active': selectedUser === 0 },
+                )}
+                onClick={() => setSelectedUser(0)}
               >
                 All
               </a>
-
-              <a
-                href="#/"
-              >
-                User 1
-              </a>
-
-              <a
-                href="#/"
-                className="is-active"
-              >
-                User 2
-              </a>
-
-              <a
-                href="#/"
-              >
-                User 3
-              </a>
+              {PreparedPhotos.map(user => (
+                <a
+                  className={classNames(
+                    { 'is-active': selectedUser === user.id },
+                  )}
+                  key={user.id}
+                  href="#/"
+                  onClick={() => setSelectedUser(user.id)}
+                >
+                  {user.user?.name}
+                </a>
+              ))}
             </p>
 
             <div className="panel-block">
@@ -48,20 +89,26 @@ export const App: React.FC = () => {
                   type="text"
                   className="input"
                   placeholder="Search"
-                  value="qwe"
+                  value={photoSearch}
+                  onChange={handleChange}
                 />
 
                 <span className="icon is-left">
                   <i className="fas fa-search" aria-hidden="true" />
                 </span>
 
-                <span className="icon is-right">
-                  {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
-                  <button
-                    type="button"
-                    className="delete"
-                  />
-                </span>
+                {photoSearch
+                && (
+                  <span className="icon is-right">
+                    {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
+                    <button
+                      data-cy="ClearButton"
+                      type="button"
+                      className="delete"
+                      onClick={handleDelete}
+                    />
+                  </span>
+                )}
               </p>
             </div>
 
@@ -127,71 +174,26 @@ export const App: React.FC = () => {
           <table
             className="table is-striped is-narrow is-fullwidth"
           >
-            <thead>
-              <tr>
-                <th>
-                  <span className="is-flex is-flex-wrap-nowrap">
-                    ID
-
-                    <a href="#/">
-                      <span className="icon">
-                        <i data-cy="SortIcon" className="fas fa-sort" />
-                      </span>
-                    </a>
-                  </span>
-                </th>
-
-                <th>
-                  <span className="is-flex is-flex-wrap-nowrap">
-                    Photo name
-
-                    <a href="#/">
-                      <span className="icon">
-                        <i className="fas fa-sort-down" />
-                      </span>
-                    </a>
-                  </span>
-                </th>
-
-                <th>
-                  <span className="is-flex is-flex-wrap-nowrap">
-                    Album name
-
-                    <a href="#/">
-                      <span className="icon">
-                        <i className="fas fa-sort-up" />
-                      </span>
-                    </a>
-                  </span>
-                </th>
-
-                <th>
-                  <span className="is-flex is-flex-wrap-nowrap">
-                    User name
-
-                    <a href="#/">
-                      <span className="icon">
-                        <i className="fas fa-sort" />
-                      </span>
-                    </a>
-                  </span>
-                </th>
-              </tr>
-            </thead>
-
             <tbody>
-              <tr>
-                <td className="has-text-weight-bold">
-                  1
-                </td>
+              {visiblePhotos.map(photo => (
+                <tr key={photo.id}>
+                  <td className="has-text-weight-bold">
+                    {photo.id}
+                  </td>
 
-                <td>accusamus beatae ad facilis cum similique qui sunt</td>
-                <td>quidem molestiae enim</td>
+                  <td>{photo.title}</td>
+                  <td>{photo.album?.title}</td>
 
-                <td className="has-text-link">
-                  Max
-                </td>
-              </tr>
+                  <td
+                    className={classNames({
+                      'has-text-link': photo.user?.sex === 'm',
+                      'has-text-danger': photo.user?.sex === 'f',
+                    })}
+                  >
+                    {photo.user?.name}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
