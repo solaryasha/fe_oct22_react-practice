@@ -4,9 +4,10 @@ import { PreparedPhoto } from './types/preparedPhotos';
 
 interface Props {
   photos: PreparedPhoto[]
+  onMove: React.Dispatch<React.SetStateAction<PreparedPhoto[]>>,
 }
 
-export const Table: FC<Props> = ({ photos }) => {
+export const Table: FC<Props> = ({ photos, onMove }) => {
   return (
     <table
       className="table is-striped is-narrow is-fullwidth"
@@ -65,7 +66,13 @@ export const Table: FC<Props> = ({ photos }) => {
 
       <tbody>
         {
-          photos.map(photo => <PhotoComponent key={photo.id} photo={photo} />)
+          photos.map(photo => (
+            <PhotoComponent
+              key={photo.id}
+              photo={photo}
+              onMove={onMove}
+            />
+          ))
         }
       </tbody>
     </table>

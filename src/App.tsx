@@ -8,7 +8,7 @@ import usersFromServer from './api/users';
 import albumsFromServer from './api/albums';
 
 export const App: React.FC = () => {
-  const [photos] = useState<PreparedPhoto[]>(preparePhotosForRender);
+  const [photos, setPhotos] = useState<PreparedPhoto[]>(preparePhotosForRender);
   const [selectedUser, setSelectedUser] = useState(0);
   const [query, setQuery] = useState('');
   const [selectedAlbums, setSelectedAlbums] = useState<number[]>([]);
@@ -160,7 +160,7 @@ export const App: React.FC = () => {
                   No photos matching selected criteria
                 </p>
               )
-              : <Table photos={visiblePhotos} />
+              : <Table photos={visiblePhotos} onMove={setPhotos} />
           }
 
         </div>
