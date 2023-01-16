@@ -43,42 +43,6 @@ export const App: React.FC = () => {
     setSelectedAlbumIds([]);
   };
 
-  // const moveUpPhoto = (id: number) => {
-  //   const position = photos.findIndex(photo => photo.id === id);
-
-  //   if (position === 0) {
-  //     return photos;
-  //   }
-
-  //   const prevPhoto = photos[position - 1];
-  //   const currentPhoto = photos[position];
-
-  //   const newPhotos = [...photos];
-
-  //   newPhotos[position - 1] = currentPhoto;
-  //   newPhotos[position] = prevPhoto;
-
-  //   return setPhotos(newPhotos);
-  // };
-
-  // const moveDownPhoto = (id: number) => {
-  //   const position = photos.findIndex(photo => photo.id === id);
-
-  //   if (position === photos.length - 1) {
-  //     return photos;
-  //   }
-
-  //   const prevPhoto = photos[position];
-  //   const currentPhoto = photos[position + 1];
-
-  //   const newPhotos = [...photos];
-
-  //   newPhotos[position] = currentPhoto;
-  //   newPhotos[position + 1] = prevPhoto;
-
-  //   return setPhotos(newPhotos);
-  // };
-
   const preparedSeserchedQuery = serchedQuery.toLowerCase();
 
   const resetAllFilters = () => {
@@ -212,7 +176,10 @@ export const App: React.FC = () => {
                 href="#/"
                 className={cn('button is-success mr-6',
                   { 'is-outlined': selectedAlbumIds.length })}
-                onClick={clearSelectedAlbums}
+                onClick={() => {
+                  clearSelectedAlbums();
+                  setPhotos(allPhotos);
+                }}
               >
                 All
               </a>
@@ -342,7 +309,6 @@ export const App: React.FC = () => {
               </tbody>
             ))}
           </table>
-
         </div>
       </div>
     </div>
