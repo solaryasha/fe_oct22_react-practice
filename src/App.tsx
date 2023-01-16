@@ -142,7 +142,7 @@ export const App: React.FC = () => {
                   onClick={() => onSelectAlbumFilter(album.id)}
                   key={album.id}
                 >
-                  {album.title}
+                  {`Album ${album.id}`}
                 </a>
               ))}
             </div>
