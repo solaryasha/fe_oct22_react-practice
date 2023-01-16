@@ -20,6 +20,21 @@ export const App: React.FC = () => {
   const [photos] = useState(photosWithAlbumAndUser);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedUserId, setSelectedUserId] = useState(0);
+  const [selectedAlbumsIds, setSelectedAlbumsIds] = useState<number[]>([]);
+
+  const onSelectAlbumFilter = (id: number) => {
+    setSelectedAlbumsIds((prev) => {
+      if (prev.includes(id)) {
+        return prev.filter(albumId => albumId !== id);
+      }
+
+      return [...prev, id];
+    });
+  };
+
+  const clearSelectedAlbums = () => {
+    setSelectedAlbumsIds([]);
+  };
 
   const visiblePhotos = photos.filter(photo => {
     const filterByName = selectedUserId !== 0
@@ -29,10 +44,15 @@ export const App: React.FC = () => {
     const filterByInput = photo.title.toLowerCase()
       .includes(searchQuery.toLowerCase());
 
-    return filterByInput && filterByName;
+    const filterByAlbum = selectedAlbumsIds.length
+      ? selectedAlbumsIds.includes(photo.album?.id || 0)
+      : true;
+
+    return filterByInput && filterByName && filterByAlbum;
   });
 
   const resetAllFilters = () => {
+    clearSelectedAlbums();
     setSearchQuery('');
     setSelectedUserId(0);
   };
