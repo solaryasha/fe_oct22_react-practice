@@ -1,11 +1,56 @@
-import React from 'react';
+import React, { useState } from 'react';
+import cn from 'classnames';
 import './App.scss';
+import { User, Album, Photo } from './types/types';
 
-// import usersFromServer from './api/users';
-// import photosFromServer from './api/photos';
-// import albumsFromServer from './api/albums';
+import usersFromServer from './api/users';
+import photosFromServer from './api/photos';
+import albumsFromServer from './api/albums';
+
+const PhotoWithUsers = photosFromServer.map(photo => {
+  const album = albumsFromServer.find((item: Album) => (
+    item.id === photo.albumId
+  )) || null;
+  const user = usersFromServer.find((person: User) => (
+    person.id === album?.userId
+  )) || null;
+
+  return {
+    ...photo,
+    album,
+    user,
+  };
+});
 
 export const App: React.FC = () => {
+  const [photos, setPhotos] = useState<Photo[]>(PhotoWithUsers);
+  const [selectedUser, setSelectedUser] = useState(-1);
+  const [selectedPhoto, setSelectedPhoto] = useState('');
+
+  const handleClickFilterUser = (user: number) => {
+    setSelectedUser(user);
+
+    setPhotos(
+      [...PhotoWithUsers.filter(photo => photo.user && photo.user.id === user)],
+    );
+  };
+
+  const handleChangePhoto = () => {
+    setPhotos(PhotoWithUsers.filter((photo: Photo) => (
+      photo.title.includes(selectedPhoto)
+    )));
+  };
+
+  const handleClickAlbum = (album: number) => {
+    setPhotos(PhotoWithUsers.filter((photo: Photo) => (
+      photo.album?.id === album
+    )));
+  };
+
+  const hadnleClearForm = () => {
+    setPhotos(PhotoWithUsers);
+  };
+
   return (
     <div className="section">
       <div className="container">
@@ -18,28 +63,22 @@ export const App: React.FC = () => {
             <p className="panel-tabs has-text-weight-bold">
               <a
                 href="#/"
+                className={cn({ 'is-active': selectedUser === 0 })}
+                onClick={() => setPhotos(PhotoWithUsers)}
               >
                 All
               </a>
 
-              <a
-                href="#/"
-              >
-                User 1
-              </a>
+              {usersFromServer.map(user => (
+                <a
+                  href="#/"
+                  className={cn({ 'is-active': user.id === selectedUser })}
+                  onClick={() => handleClickFilterUser(user.id)}
+                >
+                  {user.name}
+                </a>
+              ))}
 
-              <a
-                href="#/"
-                className="is-active"
-              >
-                User 2
-              </a>
-
-              <a
-                href="#/"
-              >
-                User 3
-              </a>
             </p>
 
             <div className="panel-block">
@@ -48,7 +87,11 @@ export const App: React.FC = () => {
                   type="text"
                   className="input"
                   placeholder="Search"
-                  value="qwe"
+                  value={selectedPhoto}
+                  onChange={(event) => {
+                    setSelectedPhoto(event.target.value);
+                    handleChangePhoto();
+                  }}
                 />
 
                 <span className="icon is-left">
@@ -73,45 +116,22 @@ export const App: React.FC = () => {
                 All
               </a>
 
-              <a
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Album 1
-              </a>
-
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 2
-              </a>
-
-              <a
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Album 3
-              </a>
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 4
-              </a>
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 5
-              </a>
+              {albumsFromServer.map(album => (
+                <a
+                  className="button mr-2 my-1 is-info"
+                  href="#/"
+                  onClick={() => handleClickAlbum(album.id)}
+                >
+                  {album.title}
+                </a>
+              ))}
             </div>
 
             <div className="panel-block">
               <a
                 href="#/"
                 className="button is-link is-outlined is-fullwidth"
-
+                onClick={hadnleClearForm}
               >
                 Reset all filters
               </a>
@@ -180,18 +200,28 @@ export const App: React.FC = () => {
             </thead>
 
             <tbody>
-              <tr>
-                <td className="has-text-weight-bold">
-                  1
-                </td>
+              {photos.map(photo => {
+                const { user, album } = photo;
 
-                <td>accusamus beatae ad facilis cum similique qui sunt</td>
-                <td>quidem molestiae enim</td>
+                return (
+                  <tr>
+                    <td className="has-text-weight-bold">
+                      {photo.id}
+                    </td>
 
-                <td className="has-text-link">
-                  Max
-                </td>
-              </tr>
+                    <td>{photo.title}</td>
+                    <td>{album?.title}</td>
+
+                    <td className={cn(
+                      { 'has-text-link': user?.sex === 'm' },
+                      { 'has-text-danger': user?.sex === 'f' },
+                    )}
+                    >
+                      {user?.name}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
