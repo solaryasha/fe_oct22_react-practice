@@ -4,9 +4,19 @@ import cn from 'classnames';
 import './App.scss';
 import { FullPhoto } from './types/types';
 import { getPrepPhotos } from './api/getPrepPhotos';
+import users from './api/users';
 
 export const App: React.FC = () => {
   const [photos] = useState<FullPhoto[]>(getPrepPhotos);
+  const [selectedUserId, setSelectedUserId] = useState(0);
+
+  const visiblePhotos = photos.filter(photo => {
+    const isUserIdMatch = selectedUserId !== 0
+      ? photo.owner?.id === selectedUserId
+      : true;
+
+    return isUserIdMatch;
+  });
 
   return (
     <div className="section">
@@ -20,28 +30,22 @@ export const App: React.FC = () => {
             <p className="panel-tabs has-text-weight-bold">
               <a
                 href="#/"
+                className={cn({ 'is-active': selectedUserId === 0 })}
+                onClick={() => setSelectedUserId(0)}
               >
                 All
               </a>
 
-              <a
-                href="#/"
-              >
-                User 1
-              </a>
-
-              <a
-                href="#/"
-                className="is-active"
-              >
-                User 2
-              </a>
-
-              <a
-                href="#/"
-              >
-                User 3
-              </a>
+              {users.map(user => (
+                <a
+                  href="#/"
+                  className={cn({ 'is-active': selectedUserId === user.id })}
+                  onClick={() => setSelectedUserId(user.id)}
+                  key={user.id}
+                >
+                  {user.name}
+                </a>
+              ))}
             </p>
 
             <div className="panel-block">
@@ -182,7 +186,7 @@ export const App: React.FC = () => {
             </thead>
 
             <tbody>
-              {photos.map(photo => (
+              {visiblePhotos.map(photo => (
                 <tr>
                   <td className="has-text-weight-bold">
                     {photo.id}
