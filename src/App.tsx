@@ -41,6 +41,16 @@ export const App: React.FC = () => {
     setSelectedAlbumIds([]);
   };
 
+  const moveUpPhoto = (id: number) => {
+    console.log(id);
+    // here will be written function whitch will take photos.id from state and move them if it's not first photo;
+  };
+
+  const moveDownPhoto = (id: number) => {
+    console.log(id);
+    // here will be written function whitch will take photos.id from state and move them if it's not first photo;
+  };
+
   const preparedSeserchedQuery = serchedQuery.toLowerCase();
 
   const resetAllFilters = () => {
@@ -229,12 +239,14 @@ export const App: React.FC = () => {
                   <th>
                     <button
                       type="button"
+                      onClick={() => moveUpPhoto(photo.id)}
                     >
                       &darr;
                     </button>
 
                     <button
                       type="button"
+                      onClick={() => moveDownPhoto(photo.id)}
                     >
                       &uarr;
                     </button>
