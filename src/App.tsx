@@ -1,11 +1,62 @@
-import React from 'react';
+import React, { useState } from 'react';
+import cn from 'classnames';
 import './App.scss';
 
-// import usersFromServer from './api/users';
-// import photosFromServer from './api/photos';
-// import albumsFromServer from './api/albums';
+import usersFromServer from './api/users';
+import photosFromServer from './api/photos';
+import albumsFromServer from './api/albums';
+
+interface Album {
+  user: string,
+  sexUser: string,
+  id: number,
+  title: string,
+}
+
+interface Photo {
+  album: Album,
+  id: number,
+  title: string,
+  url: string,
+}
 
 export const App: React.FC = () => {
+  let userFilter: string;
+  let query: string;
+  const arrAlbumsFilter: boolean[] = [];
+
+  arrAlbumsFilter.fill(false);
+
+  const albums = albumsFromServer.map(album => ({
+    user: (usersFromServer.find(user => album.userId === user.id))?.name,
+    sexUser: (usersFromServer.find(user => album.userId === user.id))?.sex,
+    id: album.id,
+    title: album.title,
+  }));
+
+  const photos = photosFromServer.map(photo => ({
+    album: albums.find(album => photo.albumId === album.id),
+    id: photo.id,
+    title: photo.title,
+    url: photo.url,
+  }));
+
+  const [filterPhotos, setFilterPhotos] = useState([...photos]);
+
+  const filterArrayOfPhotos = () => {
+    if (userFilter !== '' && userFilter !== 'All') {
+      setFilterPhotos(photos.filter(photo => photo.album?.user === userFilter));
+    } else if (userFilter === 'All') {
+      setFilterPhotos([...photos]);
+    }
+  };
+
+  const setActiveUserFilter = (event: React.MouseEvent<HTMLAnchorElement>) => {
+    userFilter = event.currentTarget.text;
+
+    filterArrayOfPhotos();
+  };
+
   return (
     <div className="section">
       <div className="container">
@@ -18,28 +69,19 @@ export const App: React.FC = () => {
             <p className="panel-tabs has-text-weight-bold">
               <a
                 href="#/"
+                onClick={setActiveUserFilter}
               >
                 All
               </a>
 
-              <a
-                href="#/"
-              >
-                User 1
-              </a>
-
-              <a
-                href="#/"
-                className="is-active"
-              >
-                User 2
-              </a>
-
-              <a
-                href="#/"
-              >
-                User 3
-              </a>
+              {usersFromServer.map(user => (
+                <a
+                  href="#/"
+                  onClick={setActiveUserFilter}
+                >
+                  {user.name}
+                </a>
+              ))}
             </p>
 
             <div className="panel-block">
@@ -180,18 +222,25 @@ export const App: React.FC = () => {
             </thead>
 
             <tbody>
-              <tr>
-                <td className="has-text-weight-bold">
-                  1
-                </td>
+              {filterPhotos.map(photo => (
+                <tr>
+                  <td className="has-text-weight-bold">
+                    {photo.id}
+                  </td>
 
-                <td>accusamus beatae ad facilis cum similique qui sunt</td>
-                <td>quidem molestiae enim</td>
+                  <td>{photo.title}</td>
+                  <td>{photo.album?.title}</td>
 
-                <td className="has-text-link">
-                  Max
-                </td>
-              </tr>
+                  <td
+                    className={cn(
+                      { 'has-text-link': photo.album?.sexUser === 'm' },
+                      { 'has-text-danger': photo.album?.sexUser === 'f' },
+                    )}
+                  >
+                    {photo.album?.user}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
