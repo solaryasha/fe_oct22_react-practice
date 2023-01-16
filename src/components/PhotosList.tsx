@@ -3,8 +3,8 @@ import { FC, memo, useState } from 'react';
 import cn from 'classnames';
 
 import { FullPhoto } from '../types/Photo';
-import { getShortString } from '../helpers/getShortString';
 import { SortType } from '../types/SortType';
+import { PhotoItem } from './Photo';
 
 type Props = {
   photos: FullPhoto[],
@@ -160,27 +160,7 @@ export const PhotosList: FC<Props> = memo(({ photos }) => {
       </thead>
 
       <tbody>
-        {photosForShow.map(({ id, title, album }) => (
-          <tr key={id}>
-            <td className="has-text-weight-bold">
-              {id}
-            </td>
-
-            <td>{title}</td>
-            <td>
-              {album?.title && getShortString(album?.title, 21)}
-            </td>
-
-            <td
-              className={cn({
-                'has-text-link': album?.user?.sex === 'm',
-                'has-text-danger': album?.user?.sex === 'f',
-              })}
-            >
-              {album?.user?.name}
-            </td>
-          </tr>
-        ))}
+        {photosForShow.map(photo => <PhotoItem key={photo.id} photo={photo} />)}
       </tbody>
     </table>
   );
