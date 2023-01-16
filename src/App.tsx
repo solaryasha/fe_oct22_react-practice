@@ -28,13 +28,19 @@ const preparedPhotos: PreparedPhoto[] = photosFromServer.map(photo => {
 export const App: React.FC = () => {
   const [photos] = useState(preparedPhotos);
   const [selectedUserId, setSelectedUserId] = useState(0);
+  const [filterQuery, setFilterQuery] = useState('');
+
+  const normalizedQuery = filterQuery.toLowerCase();
 
   const visiblePhotos = photos.filter(photo => {
+    const normalizedPhotoTitle = photo.title.toLowerCase();
+    const isQueryMatch = normalizedPhotoTitle.includes(normalizedQuery);
+
     const isSelectedUserIdMatch = selectedUserId !== 0
       ? selectedUserId === photo.user?.id
       : true;
 
-    return isSelectedUserIdMatch;
+    return isQueryMatch && isSelectedUserIdMatch;
   });
 
   return (
@@ -77,20 +83,24 @@ export const App: React.FC = () => {
                   type="text"
                   className="input"
                   placeholder="Search"
-                  value="qwe"
+                  value={filterQuery}
+                  onChange={event => setFilterQuery(event.target.value)}
                 />
 
                 <span className="icon is-left">
                   <i className="fas fa-search" aria-hidden="true" />
                 </span>
 
-                <span className="icon is-right">
-                  {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
-                  <button
-                    type="button"
-                    className="delete"
-                  />
-                </span>
+                {filterQuery && (
+                  <span className="icon is-right">
+                    {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
+                    <button
+                      type="button"
+                      className="delete"
+                      onClick={() => setFilterQuery('')}
+                    />
+                  </span>
+                )}
               </p>
             </div>
 
