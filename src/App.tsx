@@ -1,11 +1,46 @@
-import React from 'react';
+import { useState, useEffect } from 'react';
 import './App.scss';
+import { PhotoTable } from './components/PhotoTable';
+import { PhotoFull } from './types/types';
 
-// import usersFromServer from './api/users';
-// import photosFromServer from './api/photos';
-// import albumsFromServer from './api/albums';
+import users from './api/users';
+import photosFromServer from './api/photos';
+import albums from './api/albums';
+
+export const getPreparedPhoto = (): PhotoFull[] => {
+  return photosFromServer.map(photo => {
+    const album = albums.find(element => element.id === photo.albumId);
+    const owner = users.find(user => user.id === album?.userId);
+
+    return {
+      ...photo,
+      album,
+      owner,
+    };
+  });
+};
 
 export const App: React.FC = () => {
+  const [photos, setPhotos] = useState<PhotoFull[]>([]);
+  const [SearchQuery] = useState<string>('');
+  const [selectedUserId] = useState<number>(0);
+
+  const visiblePhotos = photos.filter(photo => {
+    const searchQueryMathed = photo.title.toLowerCase().includes(
+      SearchQuery.toLowerCase(),
+    );
+
+    const isSelectedUserMathed = selectedUserId !== 0
+      ? photo.owner?.id === selectedUserId
+      : true;
+
+    return searchQueryMathed && isSelectedUserMathed;
+  });
+
+  useEffect(() => {
+    setPhotos(getPreparedPhoto());
+  }, []);
+
   return (
     <div className="section">
       <div className="container">
@@ -119,82 +154,7 @@ export const App: React.FC = () => {
           </nav>
         </div>
 
-        <div className="box table-container">
-          <p data-cy="NoMatchingMessage">
-            No photos matching selected criteria
-          </p>
-
-          <table
-            className="table is-striped is-narrow is-fullwidth"
-          >
-            <thead>
-              <tr>
-                <th>
-                  <span className="is-flex is-flex-wrap-nowrap">
-                    ID
-
-                    <a href="#/">
-                      <span className="icon">
-                        <i data-cy="SortIcon" className="fas fa-sort" />
-                      </span>
-                    </a>
-                  </span>
-                </th>
-
-                <th>
-                  <span className="is-flex is-flex-wrap-nowrap">
-                    Photo name
-
-                    <a href="#/">
-                      <span className="icon">
-                        <i className="fas fa-sort-down" />
-                      </span>
-                    </a>
-                  </span>
-                </th>
-
-                <th>
-                  <span className="is-flex is-flex-wrap-nowrap">
-                    Album name
-
-                    <a href="#/">
-                      <span className="icon">
-                        <i className="fas fa-sort-up" />
-                      </span>
-                    </a>
-                  </span>
-                </th>
-
-                <th>
-                  <span className="is-flex is-flex-wrap-nowrap">
-                    User name
-
-                    <a href="#/">
-                      <span className="icon">
-                        <i className="fas fa-sort" />
-                      </span>
-                    </a>
-                  </span>
-                </th>
-              </tr>
-            </thead>
-
-            <tbody>
-              <tr>
-                <td className="has-text-weight-bold">
-                  1
-                </td>
-
-                <td>accusamus beatae ad facilis cum similique qui sunt</td>
-                <td>quidem molestiae enim</td>
-
-                <td className="has-text-link">
-                  Max
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <PhotoTable photos={visiblePhotos} />
       </div>
     </div>
   );
