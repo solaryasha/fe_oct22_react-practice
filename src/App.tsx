@@ -137,6 +137,7 @@ export const App: React.FC = () => {
 
               {albumsFromServer.map(album => (
                 <a
+                  key={album.id}
                   className={cn(
                     'button mr-2 my-1',
                     {
