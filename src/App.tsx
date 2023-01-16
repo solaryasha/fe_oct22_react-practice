@@ -32,6 +32,7 @@ export const App: React.FC = () => {
   const [photos] = useState(getPreparedPhotos());
   const [selectedUserId, setSelectedUserId] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedAlbumsId, setSelectedAlbumsId] = useState<number[]>([]);
 
   const preparedSearchQuery = searchQuery.toLowerCase().trim();
 
@@ -42,16 +43,32 @@ export const App: React.FC = () => {
       ? photo.album?.owner?.id === selectedUserId
       : true;
 
-    const isQueryMatch = searchQuery
+    const isQueryTheSame = searchQuery
       ? preparedTitle.includes(preparedSearchQuery)
       : true;
 
-    return isUserIdSelected && isQueryMatch;
+    const isAlbumSelected = selectedAlbumsId.length
+      ? selectedAlbumsId.includes(photo.albumId)
+      : true;
+
+    return isUserIdSelected && isQueryTheSame && isAlbumSelected;
   });
 
   const clearFilters = () => {
     setSearchQuery('');
     setSelectedUserId(0);
+    setSelectedAlbumsId([]);
+  };
+
+  const getSelectedAlbums = (albumId: number) => {
+    if (selectedAlbumsId.includes(albumId)) {
+      setSelectedAlbumsId(selectedAlbumsId.filter(id => id !== albumId));
+    } else {
+      setSelectedAlbumsId(albumsIds => [
+        ...albumsIds,
+        albumId,
+      ]);
+    }
   };
 
   return (
@@ -114,43 +131,28 @@ export const App: React.FC = () => {
             <div className="panel-block is-flex-wrap-wrap">
               <a
                 href="#/"
-                className="button is-success mr-6 is-outlined"
+                className={cn(
+                  'button is-success mr-6',
+                  { 'is-outlined': selectedAlbumsId.length },
+                )}
+                onClick={() => setSelectedAlbumsId([])}
               >
                 All
               </a>
 
-              <a
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Album 1
-              </a>
-
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 2
-              </a>
-
-              <a
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Album 3
-              </a>
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 4
-              </a>
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 5
-              </a>
+              {albumsFromServer.map(album => (
+                <a
+                  key={album.id}
+                  className={cn(
+                    'button mr-2 my-1',
+                    { 'is-info': selectedAlbumsId.includes(album.id) },
+                  )}
+                  href="#/"
+                  onClick={() => getSelectedAlbums(album.id)}
+                >
+                  {`Album #${album.id}`}
+                </a>
+              ))}
             </div>
 
             <div className="panel-block">
