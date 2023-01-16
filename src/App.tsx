@@ -1,11 +1,43 @@
-import React from 'react';
+import React, { useState } from 'react';
+import cn from 'classnames';
+import { getPreparedPhotos } from './api/getPreparedProducts';
 import './App.scss';
-
-// import usersFromServer from './api/users';
-// import photosFromServer from './api/photos';
-// import albumsFromServer from './api/albums';
+import albums from './api/albums';
+import users from './api/users';
 
 export const App: React.FC = () => {
+  const [photos] = useState(getPreparedPhotos);
+  const [search, setSearch] = useState('');
+  const [selectedUserId, setSelectedUserId] = useState(0);
+  const [selectedAlbumsId, setSelectedAlbumsId] = useState<number[]>([]);
+
+  const onSelectAlbumFilter = (id: number) => {
+    setSelectedAlbumsId(prev => {
+      if (prev.includes(id)) {
+        return prev.filter(el => el !== id);
+      }
+
+      return [...prev, id];
+    });
+  };
+
+  const visiblePhotos = photos.filter(photo => {
+    const { title } = photo;
+    const albumId = photo.album?.id || 0;
+    const preparedTitle = title.toLowerCase();
+
+    const isSearchMatch = preparedTitle.includes(search.toLowerCase());
+    const isUserIdMatch = selectedUserId !== 0
+      ? photo.owner?.id === selectedUserId
+      : true;
+
+    const isAlbumsMatch = setSelectedAlbumsId.length
+      ? selectedAlbumsId.includes(albumId)
+      : true;
+
+    return isSearchMatch && isUserIdMatch && isAlbumsMatch;
+  });
+
   return (
     <div className="section">
       <div className="container">
@@ -17,29 +49,23 @@ export const App: React.FC = () => {
 
             <p className="panel-tabs has-text-weight-bold">
               <a
+                className={cn({ 'is-active': selectedUserId === 0 })}
                 href="#/"
+                onClick={() => setSelectedUserId(0)}
               >
                 All
               </a>
 
-              <a
-                href="#/"
-              >
-                User 1
-              </a>
-
-              <a
-                href="#/"
-                className="is-active"
-              >
-                User 2
-              </a>
-
-              <a
-                href="#/"
-              >
-                User 3
-              </a>
+              {users.map(user => (
+                <a
+                  className={cn({ 'is-active': selectedUserId === user.id })}
+                  href="#/"
+                  onClick={() => setSelectedUserId(user.id)}
+                  key={user.id}
+                >
+                  {user.name}
+                </a>
+              ))}
             </p>
 
             <div className="panel-block">
@@ -48,7 +74,8 @@ export const App: React.FC = () => {
                   type="text"
                   className="input"
                   placeholder="Search"
-                  value="qwe"
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
                 />
 
                 <span className="icon is-left">
@@ -57,10 +84,15 @@ export const App: React.FC = () => {
 
                 <span className="icon is-right">
                   {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
-                  <button
-                    type="button"
-                    className="delete"
-                  />
+                  {search && (
+                    // eslint-disable-next-line jsx-a11y/control-has-associated-label
+                    <button
+                      type="button"
+                      className="delete"
+                      onClick={() => setSearch('')}
+                    />
+                  )}
+
                 </span>
               </p>
             </div>
@@ -73,38 +105,16 @@ export const App: React.FC = () => {
                 All
               </a>
 
-              <a
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Album 1
-              </a>
+              {albums.map(album => (
+                <a
+                  className="button mr-2 my-1 is-info"
+                  href="#/"
+                  onClick={() => onSelectAlbumFilter(album.id)}
+                >
+                  {album.title}
+                </a>
+              ))}
 
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 2
-              </a>
-
-              <a
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Album 3
-              </a>
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 4
-              </a>
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 5
-              </a>
             </div>
 
             <div className="panel-block">
@@ -180,18 +190,25 @@ export const App: React.FC = () => {
             </thead>
 
             <tbody>
-              <tr>
-                <td className="has-text-weight-bold">
-                  1
-                </td>
+              {visiblePhotos.map(photo => (
+                <tr key={photo.id}>
+                  <td className="has-text-weight-bold">
+                    {photo.id}
+                  </td>
 
-                <td>accusamus beatae ad facilis cum similique qui sunt</td>
-                <td>quidem molestiae enim</td>
+                  <td>{photo.title}</td>
+                  <td>{photo.album?.title}</td>
 
-                <td className="has-text-link">
-                  Max
-                </td>
-              </tr>
+                  <td className={cn({
+                    'has-text-link': photo.owner?.sex === 'm',
+                    'has-text-danger': photo.owner?.sex === 'f',
+                  })}
+                  >
+                    {photo.owner?.name}
+                  </td>
+                </tr>
+              ))}
+
             </tbody>
           </table>
         </div>
