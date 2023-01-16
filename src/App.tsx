@@ -51,6 +51,11 @@ export const App: React.FC = () => {
     return isUserIdSelected && isQueryMatch;
   });
 
+  const resetAllFilters = () => {
+    setSelectedUserId(0);
+    setQuery('');
+  };
+
   return (
     <div className="section">
       <div className="container">
@@ -154,6 +159,7 @@ export const App: React.FC = () => {
               <a
                 href="#/"
                 className="button is-link is-outlined is-fullwidth"
+                onClick={resetAllFilters}
 
               >
                 Reset all filters
@@ -163,74 +169,79 @@ export const App: React.FC = () => {
         </div>
 
         <div className="box table-container">
-          <p data-cy="NoMatchingMessage">
-            No photos matching selected criteria
-          </p>
+          {visiblePhotos.length === 0
+            ? (
+              <p data-cy="NoMatchingMessage">
+                No photos matching selected criteria
+              </p>
+            )
+            : (
+              <table
+                className="table is-striped is-narrow is-fullwidth"
+              >
+                <thead>
+                  <tr>
+                    <th>
+                      <span className="is-flex is-flex-wrap-nowrap">
+                        ID
 
-          <table
-            className="table is-striped is-narrow is-fullwidth"
-          >
-            <thead>
-              <tr>
-                <th>
-                  <span className="is-flex is-flex-wrap-nowrap">
-                    ID
-
-                    <a href="#/">
-                      <span className="icon">
-                        <i data-cy="SortIcon" className="fas fa-sort" />
+                        <a href="#/">
+                          <span className="icon">
+                            <i data-cy="SortIcon" className="fas fa-sort" />
+                          </span>
+                        </a>
                       </span>
-                    </a>
-                  </span>
-                </th>
+                    </th>
 
-                <th>
-                  <span className="is-flex is-flex-wrap-nowrap">
-                    Photo name
+                    <th>
+                      <span className="is-flex is-flex-wrap-nowrap">
+                        Photo name
 
-                    <a href="#/">
-                      <span className="icon">
-                        <i className="fas fa-sort-down" />
+                        <a href="#/">
+                          <span className="icon">
+                            <i className="fas fa-sort-down" />
+                          </span>
+                        </a>
                       </span>
-                    </a>
-                  </span>
-                </th>
+                    </th>
 
-                <th>
-                  <span className="is-flex is-flex-wrap-nowrap">
-                    Album name
+                    <th>
+                      <span className="is-flex is-flex-wrap-nowrap">
+                        Album name
 
-                    <a href="#/">
-                      <span className="icon">
-                        <i className="fas fa-sort-up" />
+                        <a href="#/">
+                          <span className="icon">
+                            <i className="fas fa-sort-up" />
+                          </span>
+                        </a>
                       </span>
-                    </a>
-                  </span>
-                </th>
+                    </th>
 
-                <th>
-                  <span className="is-flex is-flex-wrap-nowrap">
-                    User name
+                    <th>
+                      <span className="is-flex is-flex-wrap-nowrap">
+                        User name
 
-                    <a href="#/">
-                      <span className="icon">
-                        <i className="fas fa-sort" />
+                        <a href="#/">
+                          <span className="icon">
+                            <i className="fas fa-sort" />
+                          </span>
+                        </a>
                       </span>
-                    </a>
-                  </span>
-                </th>
-              </tr>
-            </thead>
+                    </th>
+                  </tr>
+                </thead>
 
-            <tbody>
-              {visiblePhotos.map(photo => (
-                <TableItem
-                  key={photo.id}
-                  photo={photo}
-                />
-              ))}
-            </tbody>
-          </table>
+                <tbody>
+                  {visiblePhotos.map(photo => (
+                    <TableItem
+                      key={photo.id}
+                      photo={photo}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            )}
+
         </div>
       </div>
     </div>
