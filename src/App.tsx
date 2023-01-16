@@ -4,28 +4,28 @@ import albums from './api/albums';
 import users from './api/users';
 import './App.scss';
 import { getPreparedPhotos } from './api/getPreparedphotos';
-// import { filterPhotos } from './filterPhotos';
+import { filterPhotos } from './filterPhotos';
 
 export const App: React.FC = () => {
   const [photos] = useState(getPreparedPhotos);
   const [selectedUserId, setSelectedUseriD] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
-  // const [selectedAlbumsIds, setSelectedAlbumsIds] = useState<number[]>([]);
+  const [selectedAlbumsIds, setSelectedAlbumsIds] = useState<number[]>([]);
 
-  // const onSelectAlbumsFilter = (id: number) => {
-  //   setSelectedAlbumsIds((prev) => {
-  //     if (prev.includes(id)) {
-  //       return prev.filter(l => l !== id);
-  //     }
+  const onSelectAlbumsFilter = (id: number) => {
+    setSelectedAlbumsIds((prev) => {
+      if (prev.includes(id)) {
+        return prev.filter(l => l !== id);
+      }
 
-  //     return [...prev, id];
-  //   });
-  // };
+      return [...prev, id];
+    });
+  };
 
-  // const visiblePhotos = filterPhotos(
-  //   photos,
-  //   { searchQuery, selectedAlbumsIds, selectedUserId },
-  // );
+  const visiblePhotos = filterPhotos(
+    photos,
+    { searchQuery, selectedAlbumsIds, selectedUserId },
+  );
 
   return (
     <div className="section">
