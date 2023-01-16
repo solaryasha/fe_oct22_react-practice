@@ -17,7 +17,10 @@ export interface User {
   sex: string;
 }
 
+export interface PreparedAlbum extends Album {
+  user?: User,
+}
+
 export interface PreparedPhoto extends Photo {
-  album: Album,
-  user: User,
+  album?: Album,
 }

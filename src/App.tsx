@@ -5,35 +5,43 @@ import './App.scss';
 import usersFromServer from './api/users';
 import photosFromServer from './api/photos';
 import albumsFromServer from './api/albums';
+import { PreparedAlbum } from './types/types';
 
-function findUserById(id: number) {
-  return usersFromServer.find(user => user.id === id);
-}
-
-function getPreparedAlbums() {
+function getPreparedAlbums(): PreparedAlbum[] {
   return albumsFromServer.map(album => (
     {
       ...album,
-      user: findUserById(album.userId),
+      user: usersFromServer.find(user => user.id === album.userId),
     }
   ));
 }
 
-const getPreparedPhotos = photosFromServer.map(photo => {
-  const preparedAlbums = getPreparedAlbums();
+const getPreparedPhotos = () => (
+  photosFromServer.map(photo => {
+    const preparedAlbums = getPreparedAlbums();
 
-  const album = preparedAlbums.find(alb => alb.id === photo.albumId);
+    const album = preparedAlbums.find(alb => alb.id === photo.albumId);
 
-  return {
-    ...photo,
-    album,
-  };
-});
+    return {
+      ...photo,
+      album,
+    };
+  })
+);
 
 export const App: React.FC = () => {
   const [photos] = useState(getPreparedPhotos);
   const [selectedUserId, setSelectedUserId] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedAlbumsIds, setSelectedAlbumsIds] = useState<number[]>([]);
+
+  const handleAlbumsSelect = (albumId: number) => {
+    setSelectedAlbumsIds((prevAlbums) => {
+      return prevAlbums.includes(albumId)
+        ? prevAlbums.filter(al => al !== albumId)
+        : [...prevAlbums, albumId];
+    });
+  };
 
   const visiblePhotos = photos.filter(photo => {
     const filterByName = selectedUserId !== 0
@@ -43,12 +51,17 @@ export const App: React.FC = () => {
     const filterByInput = photo.title.toLowerCase()
       .includes(searchQuery.toLowerCase());
 
-    return filterByInput && filterByName;
+    const filterByAlbums = selectedAlbumsIds.length !== 0
+      ? selectedAlbumsIds.includes(photo.album?.id || 0)
+      : true;
+
+    return filterByInput && filterByName && filterByAlbums;
   });
 
   const resetAllFilters = () => {
     setSearchQuery('');
     setSelectedUserId(0);
+    setSelectedAlbumsIds([]);
   };
 
   return (
@@ -71,6 +84,7 @@ export const App: React.FC = () => {
 
               {usersFromServer.map(user => (
                 <a
+                  key={user.id}
                   className={cn({ 'is-active': user.id === selectedUserId })}
                   href="#/"
                   onClick={() => setSelectedUserId(user.id)}
@@ -110,43 +124,31 @@ export const App: React.FC = () => {
             <div className="panel-block is-flex-wrap-wrap">
               <a
                 href="#/"
-                className="button is-success mr-6 is-outlined"
+                className={cn(
+                  'button is-success mr-6',
+                  {
+                    'is-outlined': selectedAlbumsIds.length !== 0,
+                  },
+                )}
+                onClick={() => setSelectedAlbumsIds([])}
               >
                 All
               </a>
 
-              <a
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Album 1
-              </a>
-
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 2
-              </a>
-
-              <a
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Album 3
-              </a>
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 4
-              </a>
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 5
-              </a>
+              {albumsFromServer.map(album => (
+                <a
+                  className={cn(
+                    'button mr-2 my-1',
+                    {
+                      'is-info': selectedAlbumsIds.includes(album.id),
+                    },
+                  )}
+                  href="#/"
+                  onClick={() => handleAlbumsSelect(album.id)}
+                >
+                  {album.title}
+                </a>
+              ))}
             </div>
 
             <div className="panel-block">
