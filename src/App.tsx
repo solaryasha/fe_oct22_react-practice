@@ -2,14 +2,15 @@ import React, { useState } from 'react';
 import './App.scss';
 import cn from 'classnames';
 
-// import usersFromServer from './api/users';
+import usersFromServer from './api/users';
 // import photosFromServer from './api/photos';
-// import albumsFromServer from './api/albums';
+import albumsFromServer from './api/albums';
 import { getPreparedPhoto } from './helpers/helpers';
 
 export const App: React.FC = () => {
   const [photos] = useState(getPreparedPhoto());
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedUserId, setSelectedUserId] = useState(0);
 
   const visiblePhotos = photos.filter(photo => {
     return photo.title.toLowerCase().includes(
@@ -28,29 +29,27 @@ export const App: React.FC = () => {
 
             <p className="panel-tabs has-text-weight-bold">
               <a
+                className={cn({
+                  'is-active': selectedUserId === 0,
+                })}
                 href="#/"
+                onClick={() => setSelectedUserId(0)}
               >
                 All
               </a>
 
-              <a
-                href="#/"
-              >
-                User 1
-              </a>
-
-              <a
-                href="#/"
-                className="is-active"
-              >
-                User 2
-              </a>
-
-              <a
-                href="#/"
-              >
-                User 3
-              </a>
+              {usersFromServer.map(user => (
+                <a
+                  href="#/"
+                  onClick={() => setSelectedUserId(user.id)}
+                  key={user.id}
+                  className={cn({
+                    'is-active': selectedUserId === user.id,
+                  })}
+                >
+                  {user.name}
+                </a>
+              ))}
             </p>
 
             <div className="panel-block">
@@ -85,38 +84,15 @@ export const App: React.FC = () => {
                 All
               </a>
 
-              <a
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Album 1
-              </a>
-
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 2
-              </a>
-
-              <a
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Album 3
-              </a>
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 4
-              </a>
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 5
-              </a>
+              {albumsFromServer.map(album => (
+                <a
+                  className="button mr-2 my-1 is-info"
+                  href="#/"
+                  key={album.id}
+                >
+                  {album.title}
+                </a>
+              ))}
             </div>
 
             <div className="panel-block">
@@ -193,7 +169,7 @@ export const App: React.FC = () => {
 
             <tbody>
               {visiblePhotos.map(photo => (
-                <tr>
+                <tr key={photo.id}>
                   <td className="has-text-weight-bold">
                     {photo.id}
                   </td>
