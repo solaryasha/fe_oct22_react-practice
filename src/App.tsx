@@ -147,7 +147,7 @@ export const App: React.FC = () => {
                   href="#/"
                   onClick={() => handleAlbumsSelect(album.id)}
                 >
-                  {album.title}
+                  {`Album ${album.id}`}
                 </a>
               ))}
             </div>
