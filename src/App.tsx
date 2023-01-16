@@ -1,11 +1,18 @@
 import React, { useState } from 'react';
 import './App.scss';
+import cn from 'classnames';
 import { preparePhotosForRender } from './helpers';
 import { Table } from './table';
 import { PreparedPhoto } from './types/preparedPhotos';
+import usersFromServer from './api/users';
 
 export const App: React.FC = () => {
   const [photos] = useState<PreparedPhoto[]>(preparePhotosForRender);
+  const [selectedUser, setSelectedUser] = useState(0);
+
+  const visiblePhotos = selectedUser === 0
+    ? photos
+    : photos.filter(photo => photo.user?.id === selectedUser);
 
   return (
     <div className="section">
@@ -19,28 +26,24 @@ export const App: React.FC = () => {
             <p className="panel-tabs has-text-weight-bold">
               <a
                 href="#/"
+                className={cn({ 'is-active': selectedUser === 0 })}
+                onClick={() => setSelectedUser(0)}
               >
                 All
               </a>
 
-              <a
-                href="#/"
-              >
-                User 1
-              </a>
-
-              <a
-                href="#/"
-                className="is-active"
-              >
-                User 2
-              </a>
-
-              <a
-                href="#/"
-              >
-                User 3
-              </a>
+              {
+                usersFromServer.map(({ name, id }) => (
+                  <a
+                    key={id}
+                    href={`#/${id}`}
+                    className={cn({ 'is-active': selectedUser === id })}
+                    onClick={() => setSelectedUser(id)}
+                  >
+                    {name}
+                  </a>
+                ))
+              }
             </p>
 
             <div className="panel-block">
@@ -125,78 +128,7 @@ export const App: React.FC = () => {
             No photos matching selected criteria
           </p>
 
-          {/* <table
-            className="table is-striped is-narrow is-fullwidth"
-          >
-            <thead>
-              <tr>
-                <th>
-                  <span className="is-flex is-flex-wrap-nowrap">
-                    ID
-
-                    <a href="#/">
-                      <span className="icon">
-                        <i data-cy="SortIcon" className="fas fa-sort" />
-                      </span>
-                    </a>
-                  </span>
-                </th>
-
-                <th>
-                  <span className="is-flex is-flex-wrap-nowrap">
-                    Photo name
-
-                    <a href="#/">
-                      <span className="icon">
-                        <i className="fas fa-sort-down" />
-                      </span>
-                    </a>
-                  </span>
-                </th>
-
-                <th>
-                  <span className="is-flex is-flex-wrap-nowrap">
-                    Album name
-
-                    <a href="#/">
-                      <span className="icon">
-                        <i className="fas fa-sort-up" />
-                      </span>
-                    </a>
-                  </span>
-                </th>
-
-                <th>
-                  <span className="is-flex is-flex-wrap-nowrap">
-                    User name
-
-                    <a href="#/">
-                      <span className="icon">
-                        <i className="fas fa-sort" />
-                      </span>
-                    </a>
-                  </span>
-                </th>
-              </tr>
-            </thead>
-
-            <tbody>
-              <tr>
-                <td className="has-text-weight-bold">
-                  1
-                </td>
-
-                <td>accusamus beatae ad facilis cum similique qui sunt</td>
-                <td>quidem molestiae enim</td>
-
-                <td className="has-text-link">
-                  Max
-                </td>
-              </tr>
-            </tbody>
-          </table> */}
-
-          <Table photos={photos} />
+          <Table photos={visiblePhotos} />
         </div>
       </div>
     </div>
