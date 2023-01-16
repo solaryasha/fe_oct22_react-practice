@@ -20,7 +20,7 @@ function getUserById(userId: number): User | null {
   return usersFromServer.find(user => user.id === userId) || null;
 }
 
-const photos: PreparedPhoto[] = photosFromServer.map(photo => {
+const preparedPhotos: PreparedPhoto[] = photosFromServer.map(photo => {
   const album = getAlbumById(photo.albumId);
   const user = album
     ? getUserById(album.userId)
@@ -34,8 +34,10 @@ const photos: PreparedPhoto[] = photosFromServer.map(photo => {
 });
 
 export const App: React.FC = () => {
+  const [photos, setPhotos] = useState(preparedPhotos);
   const [selectedUserId, setSelectedUserId] = useState(0);
   const [inputQuery, setInputQuery] = useState('');
+  const [selectedAlbumIds, setSelectedAlbumIds] = useState<number[]>([]);
 
   let visiblePhotos = photos;
 
@@ -53,10 +55,65 @@ export const App: React.FC = () => {
     ));
   }
 
+  if (selectedAlbumIds.length) {
+    visiblePhotos = visiblePhotos.filter(photo => {
+      return photo.album !== null
+        ? selectedAlbumIds.includes(photo.album?.id)
+        : photo;
+    });
+  }
+
+  const filterByAlbum = (id: number) => {
+    let newAlbums;
+
+    if (selectedAlbumIds.includes(id)) {
+      newAlbums = selectedAlbumIds
+        .filter(albumId => albumId !== id);
+    } else {
+      newAlbums = [...selectedAlbumIds];
+      newAlbums.push(id);
+    }
+
+    setSelectedAlbumIds(newAlbums);
+  };
+
+  const moveDown = (index: number) => {
+    setPhotos(prev => {
+      if (index === prev.length - 1) {
+        return prev;
+      }
+
+      const newVisiblePhotos = [...prev];
+      const currentPhoto = newVisiblePhotos[index];
+
+      newVisiblePhotos[index] = newVisiblePhotos[index + 1];
+      newVisiblePhotos[index + 1] = currentPhoto;
+
+      return newVisiblePhotos;
+    });
+  };
+
+  const moveUp = (index: number) => {
+    setPhotos(prev => {
+      if (index === 0) {
+        return prev;
+      }
+
+      const newVisiblePhotos = [...prev];
+      const currentPhoto = newVisiblePhotos[index];
+
+      newVisiblePhotos[index] = newVisiblePhotos[index - 1];
+      newVisiblePhotos[index - 1] = currentPhoto;
+
+      return newVisiblePhotos;
+    });
+  };
+
   const resetAllFilters = () => {
     visiblePhotos = photos;
     setSelectedUserId(0);
     setInputQuery('');
+    setSelectedAlbumIds([]);
   };
 
   return (
@@ -123,18 +180,31 @@ export const App: React.FC = () => {
             <div className="panel-block is-flex-wrap-wrap">
               <a
                 href="#/"
-                className="button is-success mr-6 is-outlined"
+                className={classNames(
+                  'button is-success mr-6',
+                  {
+                    'is-outlined': selectedAlbumIds.length
+                      && selectedAlbumIds.length !== albumsFromServer.length,
+                  },
+                )}
+                onClick={() => setSelectedAlbumIds([])}
               >
                 All
               </a>
 
               {albumsFromServer.map(album => (
                 <a
-                  className="button mr-2 my-1 is-info"
+                  className={classNames(
+                    'button mr-2 my-1',
+                    {
+                      'is-info': selectedAlbumIds.includes(album.id),
+                    },
+                  )}
                   href="#/"
                   key={album.id}
+                  onClick={() => filterByAlbum(album.id)}
                 >
-                  {album.title}
+                  {`Album ${album.id}`}
                 </a>
               ))}
             </div>
@@ -206,11 +276,17 @@ export const App: React.FC = () => {
                         </a>
                       </span>
                     </th>
+
+                    <th>
+                      <span className="is-flex is-flex-wrap-nowrap">
+                        Reordering
+                      </span>
+                    </th>
                   </tr>
                 </thead>
 
                 <tbody>
-                  {visiblePhotos.map(photo => (
+                  {visiblePhotos.map((photo, index) => (
                     <tr key={photo.id}>
                       <td className="has-text-weight-bold">
                         {photo.id}
@@ -227,6 +303,21 @@ export const App: React.FC = () => {
                       >
                         {photo.user?.name}
                       </td>
+                      <button
+                        type="button"
+                        className="button"
+                        onClick={() => moveDown(index)}
+                      >
+                        &darr;
+                      </button>
+
+                      <button
+                        type="button"
+                        className="button"
+                        onClick={() => moveUp(index)}
+                      >
+                        &uarr;
+                      </button>
                     </tr>
                   ))}
                 </tbody>
