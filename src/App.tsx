@@ -10,11 +10,26 @@ import { getPreparedPhoto } from './helpers/helpers';
 export const App: React.FC = () => {
   const [photos] = useState(getPreparedPhoto());
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedUserId, setSelectedUserId] = useState(0);
+  const [selectedUserById, setSelectedUserBYId] = useState(0);
+  const [selectedAlbumByrId, setSelectedAlbumByrId] = useState<number[]>([]);
+
+  const filteredSelectedAlbumById = (id: number) => {
+    setSelectedAlbumByrId(prev => {
+      if (prev.includes(id)) {
+        return prev.filter(el => el !== id);
+      }
+
+      return [...prev, id];
+    });
+  };
+
+  const resetSelectedAlbumById = () => {
+    setSelectedAlbumByrId([]);
+  };
 
   const visiblePhotos = photos.filter(photo => {
-    const isUserMatch = selectedUserId
-      ? photo.album?.user?.id === selectedUserId
+    const isUserMatch = selectedUserById
+      ? photo.album?.user?.id === selectedUserById
       : true;
 
     return photo.title.toLowerCase().includes(
@@ -34,10 +49,10 @@ export const App: React.FC = () => {
             <p className="panel-tabs has-text-weight-bold">
               <a
                 className={cn({
-                  'is-active': selectedUserId === 0,
+                  'is-active': selectedUserById === 0,
                 })}
                 href="#/"
-                onClick={() => setSelectedUserId(0)}
+                onClick={() => setSelectedUserBYId(0)}
               >
                 All
               </a>
@@ -45,10 +60,10 @@ export const App: React.FC = () => {
               {usersFromServer.map(user => (
                 <a
                   href="#/"
-                  onClick={() => setSelectedUserId(user.id)}
+                  onClick={() => filteredSelectedAlbumById(user.id)}
                   key={user.id}
                   className={cn({
-                    'is-active': selectedUserId === user.id,
+                    'is-active': selectedUserById === user.id,
                   })}
                 >
                   {user.name}
@@ -70,31 +85,41 @@ export const App: React.FC = () => {
                   <i className="fas fa-search" aria-hidden="true" />
                 </span>
 
-                <span className="icon is-right">
-                  {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
-                  <button
-                    type="button"
-                    className="delete"
-                  />
-                </span>
+                {searchQuery && (
+                  <span className="icon is-right">
+                    {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
+                    <button
+                      type="button"
+                      className="delete"
+                      onClick={() => setSearchQuery('')}
+                    />
+                  </span>
+                )}
+
               </p>
             </div>
 
             <div className="panel-block is-flex-wrap-wrap">
               <a
                 href="#/"
-                className="button is-success mr-6 is-outlined"
+                className={cn('button is-success mr-6', {
+                  'is-outlined': selectedAlbumByrId.length,
+                })}
+                onClick={() => resetSelectedAlbumById}
               >
                 All
               </a>
 
               {albumsFromServer.map(album => (
                 <a
-                  className="button mr-2 my-1 is-info"
+                  className={cn('button mr-2 my-1', {
+                    'is-info': selectedAlbumByrId.includes(album.id),
+                  })}
                   href="#/"
                   key={album.id}
+                  onClick={() => filteredSelectedAlbumById(album.id)}
                 >
-                  {album.title}
+                  {album.id}
                 </a>
               ))}
             </div>
