@@ -1,11 +1,57 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './App.scss';
+import cn from 'classnames';
 
-// import usersFromServer from './api/users';
-// import photosFromServer from './api/photos';
-// import albumsFromServer from './api/albums';
+import usersFromServer from './api/users';
+import photosFromServer from './api/photos';
+import albumsFromServer from './api/albums';
+import { filterPhotos } from './helpers/filterPhotos';
+
+const photosWithAlbum = photosFromServer.map(photo => ({
+  ...photo,
+  album: albumsFromServer.find(album => album.id === photo.albumId),
+}));
+
+const photosWithAlbumAndUser = photosWithAlbum.map(photo => ({
+  ...photo,
+  user: usersFromServer.find(user => user.id === photo?.album?.userId),
+}));
 
 export const App: React.FC = () => {
+  const [photos] = useState(photosWithAlbumAndUser);
+  const [selectedUserId, setSelectedUserId] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedAlbumsIds, setSelectedAlbumsIds] = useState<number[]>([]);
+
+  const onSelectAlbumFilter = (id: number) => {
+    setSelectedAlbumsIds((prev) => {
+      if (prev.includes(id)) {
+        return prev.filter(el => el !== id);
+      }
+
+      return [...prev, id];
+    });
+  };
+
+  const clearSelectedAlbumsIds = () => {
+    setSelectedAlbumsIds([]);
+  };
+
+  const clearFilters = () => {
+    clearSelectedAlbumsIds();
+    setSearchQuery('');
+    setSelectedUserId(0);
+  };
+
+  const visiblePhotos = filterPhotos(
+    photos,
+    {
+      searchQuery,
+      selectedAlbumsIds,
+      selectedUserId,
+    },
+  );
+
   return (
     <div className="section">
       <div className="container">
@@ -17,29 +63,26 @@ export const App: React.FC = () => {
 
             <p className="panel-tabs has-text-weight-bold">
               <a
+                className={cn({ 'is-active': selectedUserId === 0 })}
                 href="#/"
+                onClick={() => setSelectedUserId(0)}
               >
                 All
               </a>
-
-              <a
-                href="#/"
-              >
-                User 1
-              </a>
-
-              <a
-                href="#/"
-                className="is-active"
-              >
-                User 2
-              </a>
-
-              <a
-                href="#/"
-              >
-                User 3
-              </a>
+              {usersFromServer.map(user => (
+                <a
+                  key={user.id}
+                  href="#/"
+                  className={cn({
+                    'is-active': selectedUserId === user.id,
+                    'has-text-link': user?.sex === 'm',
+                    'has-text-danger': user?.sex === 'f',
+                  })}
+                  onClick={() => setSelectedUserId(user.id)}
+                >
+                  {user.name}
+                </a>
+              ))}
             </p>
 
             <div className="panel-block">
@@ -48,20 +91,25 @@ export const App: React.FC = () => {
                   type="text"
                   className="input"
                   placeholder="Search"
-                  value="qwe"
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
                 />
 
                 <span className="icon is-left">
                   <i className="fas fa-search" aria-hidden="true" />
                 </span>
 
-                <span className="icon is-right">
-                  {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
-                  <button
-                    type="button"
-                    className="delete"
-                  />
-                </span>
+                {searchQuery && (
+                  <span className="icon is-right">
+                    {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
+                    <button
+                      type="button"
+                      className="delete"
+                      onClick={() => setSearchQuery('')}
+                    />
+                  </span>
+                )}
+
               </p>
             </div>
 
@@ -69,49 +117,30 @@ export const App: React.FC = () => {
               <a
                 href="#/"
                 className="button is-success mr-6 is-outlined"
+                onClick={() => setSelectedAlbumsIds([])}
               >
                 All
               </a>
 
-              <a
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Album 1
-              </a>
+              {albumsFromServer.map(album => (
+                <a
+                  key={album.id}
+                  className="button mr-2 my-1 is-info"
+                  href="#/"
+                  onClick={() => onSelectAlbumFilter(album.id)}
+                //               className="button mr-2 my-1 is-info"
+                >
+                  {album.title}
+                </a>
+              ))}
 
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 2
-              </a>
-
-              <a
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Album 3
-              </a>
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 4
-              </a>
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 5
-              </a>
             </div>
 
             <div className="panel-block">
               <a
                 href="#/"
                 className="button is-link is-outlined is-fullwidth"
-
+                onClick={clearFilters}
               >
                 Reset all filters
               </a>
@@ -180,18 +209,26 @@ export const App: React.FC = () => {
             </thead>
 
             <tbody>
-              <tr>
-                <td className="has-text-weight-bold">
-                  1
-                </td>
+              {visiblePhotos.map(photo => (
+                <tr key={photo.id}>
+                  <td className="has-text-weight-bold">
+                    {photo.id}
+                  </td>
 
-                <td>accusamus beatae ad facilis cum similique qui sunt</td>
-                <td>quidem molestiae enim</td>
+                  <td>{photo.title}</td>
+                  <td>{photo.album?.title}</td>
 
-                <td className="has-text-link">
-                  Max
-                </td>
-              </tr>
+                  <td
+                    className={cn('has-text-link', {
+                      'has-text-link': photo.user?.sex === 'm',
+                      'has-text-danger': photo.user?.sex === 'f',
+                    })}
+                  >
+                    {photo.user?.name}
+                  </td>
+                </tr>
+              ))}
+
             </tbody>
           </table>
         </div>
