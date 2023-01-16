@@ -31,6 +31,7 @@ export const App: React.FC = () => {
   const [photos] = useState(preparedPhotos);
   const [selectedUserID, setSelectedUserID] = useState(0);
   const [query, setQuery] = useState('');
+  const [selectedAlbumID, setSelectedAlbumID] = useState<number[]>([]);
 
   let visiblePhotos = [...photos];
 
@@ -51,6 +52,16 @@ export const App: React.FC = () => {
         .join(' ');
 
       return productName.includes(normalizedQuery);
+    });
+  }
+
+  if (selectedAlbumID.length > 0) {
+    visiblePhotos = visiblePhotos.filter(photo => {
+      if (photo.album) {
+        return selectedAlbumID.includes(photo.album.id);
+      }
+
+      return false;
     });
   }
 
@@ -124,42 +135,29 @@ export const App: React.FC = () => {
               <a
                 href="#/"
                 className="button is-success mr-6 is-outlined"
+                onClick={() => setSelectedAlbumID([])}
               >
                 All
               </a>
 
-              <a
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Album 1
-              </a>
-
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 2
-              </a>
-
-              <a
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Album 3
-              </a>
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 4
-              </a>
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 5
-              </a>
+              {albumsFromServer.map(album => (
+                <a
+                  className={classNames(
+                    'button mr-2 my-1',
+                    {
+                      'is-info': selectedAlbumID.includes(album.id),
+                    },
+                  )}
+                  href="#/"
+                  key={album.id}
+                  onClick={() => setSelectedAlbumID(prevAlbumIDs => [
+                    ...prevAlbumIDs,
+                    album.id,
+                  ])}
+                >
+                  {`${album.title.slice(0, 8)}...`}
+                </a>
+              ))}
             </div>
 
             <div className="panel-block">
