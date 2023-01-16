@@ -1,11 +1,45 @@
-import React from 'react';
+import React, { useState } from 'react';
+import classNames from 'classnames';
 import './App.scss';
 
-// import usersFromServer from './api/users';
-// import photosFromServer from './api/photos';
-// import albumsFromServer from './api/albums';
+import usersFromServer from './api/users';
+import photosFromServer from './api/photos';
+import albumsFromServer from './api/albums';
+
+import { Album, User, PreparedPhotos } from './types/types';
+
+function getAlbumById(id: number): Album | null {
+  return albumsFromServer.find(album => album.id === id) || null;
+}
+
+function getUserById(id: number | undefined): User | null {
+  return usersFromServer.find(user => user.id === id) || null;
+}
+
+const preparedPhotos: PreparedPhotos[] = photosFromServer.map(photo => {
+  const foundAlbum = getAlbumById(photo.albumId);
+  const foundUser = getUserById(foundAlbum?.userId);
+
+  return {
+    ...photo,
+    album: foundAlbum,
+    user: foundUser,
+  };
+});
 
 export const App: React.FC = () => {
+  const [photos] = useState(preparedPhotos);
+  const [selectedUserID, setSelectedUserID] = useState(0);
+  // const [query, setQuery] = useState('');
+
+  let visiblePhotos = [...photos];
+
+  if (selectedUserID) {
+    visiblePhotos = visiblePhotos.filter(photo => (
+      photo.user?.id === selectedUserID
+    ));
+  }
+
   return (
     <div className="section">
       <div className="container">
@@ -18,28 +52,30 @@ export const App: React.FC = () => {
             <p className="panel-tabs has-text-weight-bold">
               <a
                 href="#/"
+                onClick={() => setSelectedUserID(0)}
+                className={classNames(
+                  {
+                    'is-active': selectedUserID === 0,
+                  },
+                )}
               >
                 All
               </a>
 
-              <a
-                href="#/"
-              >
-                User 1
-              </a>
-
-              <a
-                href="#/"
-                className="is-active"
-              >
-                User 2
-              </a>
-
-              <a
-                href="#/"
-              >
-                User 3
-              </a>
+              {usersFromServer.map(user => (
+                <a
+                  href="#/"
+                  key={user.id}
+                  onClick={() => setSelectedUserID(user.id)}
+                  className={classNames(
+                    {
+                      'is-active': user.id === selectedUserID,
+                    },
+                  )}
+                >
+                  {user.name}
+                </a>
+              ))}
             </p>
 
             <div className="panel-block">
@@ -180,18 +216,27 @@ export const App: React.FC = () => {
             </thead>
 
             <tbody>
-              <tr>
-                <td className="has-text-weight-bold">
-                  1
-                </td>
+              {visiblePhotos.map(photo => (
+                <tr>
+                  <td className="has-text-weight-bold">
+                    {photo.id}
+                  </td>
 
-                <td>accusamus beatae ad facilis cum similique qui sunt</td>
-                <td>quidem molestiae enim</td>
+                  <td>{photo.title}</td>
+                  <td>{photo.album?.title}</td>
 
-                <td className="has-text-link">
-                  Max
-                </td>
-              </tr>
+                  <td
+                    className={classNames(
+                      {
+                        'has-text-link': photo.user?.sex === 'm',
+                        'has-text-danger': photo.user?.sex === 'f',
+                      },
+                    )}
+                  >
+                    {photo.user?.name}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
