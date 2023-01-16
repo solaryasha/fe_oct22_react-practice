@@ -21,8 +21,10 @@ const getPreparedPhoto = (): PrepPhotoWithUserAndAlbum[] => {
   });
 };
 
+const allPhotos = getPreparedPhoto();
+
 export const App: React.FC = () => {
-  const [photos] = useState(getPreparedPhoto);
+  const [photos, setPhotos] = useState(allPhotos);
   const [serchedQuery, setSerchedQuery] = useState('');
   const [selectedUserId, setSelectedUserId] = useState(0);
   const [selectedAlbumIds, setSelectedAlbumIds] = useState<number[]>([]);
@@ -41,15 +43,41 @@ export const App: React.FC = () => {
     setSelectedAlbumIds([]);
   };
 
-  const moveUpPhoto = (id: number) => {
-    console.log(id);
-    // here will be written function whitch will take photos.id from state and move them if it's not first photo;
-  };
+  // const moveUpPhoto = (id: number) => {
+  //   const position = photos.findIndex(photo => photo.id === id);
 
-  const moveDownPhoto = (id: number) => {
-    console.log(id);
-    // here will be written function whitch will take photos.id from state and move them if it's not first photo;
-  };
+  //   if (position === 0) {
+  //     return photos;
+  //   }
+
+  //   const prevPhoto = photos[position - 1];
+  //   const currentPhoto = photos[position];
+
+  //   const newPhotos = [...photos];
+
+  //   newPhotos[position - 1] = currentPhoto;
+  //   newPhotos[position] = prevPhoto;
+
+  //   return setPhotos(newPhotos);
+  // };
+
+  // const moveDownPhoto = (id: number) => {
+  //   const position = photos.findIndex(photo => photo.id === id);
+
+  //   if (position === photos.length - 1) {
+  //     return photos;
+  //   }
+
+  //   const prevPhoto = photos[position];
+  //   const currentPhoto = photos[position + 1];
+
+  //   const newPhotos = [...photos];
+
+  //   newPhotos[position] = currentPhoto;
+  //   newPhotos[position + 1] = prevPhoto;
+
+  //   return setPhotos(newPhotos);
+  // };
 
   const preparedSeserchedQuery = serchedQuery.toLowerCase();
 
@@ -57,6 +85,7 @@ export const App: React.FC = () => {
     setSerchedQuery('');
     setSelectedUserId(0);
     setSelectedAlbumIds([]);
+    setPhotos(getPreparedPhoto);
   };
 
   const visiblePhotos = photos.filter(photo => {
@@ -74,6 +103,42 @@ export const App: React.FC = () => {
     return isSerchedQueryMatch && isUserIdMatch && isAlbumsMatch;
   });
 
+  const moveUpPhoto = (id: number) => {
+    const position = visiblePhotos.findIndex(photo => photo.id === id);
+
+    if (position === 0) {
+      return visiblePhotos;
+    }
+
+    const prevPhoto = visiblePhotos[position - 1];
+    const currentPhoto = visiblePhotos[position];
+
+    const newPhotos = [...visiblePhotos];
+
+    newPhotos[position - 1] = currentPhoto;
+    newPhotos[position] = prevPhoto;
+
+    return setPhotos(newPhotos);
+  };
+
+  const moveDownPhoto = (id: number) => {
+    const position = visiblePhotos.findIndex(photo => photo.id === id);
+
+    if (position === visiblePhotos.length - 1) {
+      return visiblePhotos;
+    }
+
+    const prevPhoto = visiblePhotos[position];
+    const currentPhoto = visiblePhotos[position + 1];
+
+    const newPhotos = [...visiblePhotos];
+
+    newPhotos[position] = currentPhoto;
+    newPhotos[position + 1] = prevPhoto;
+
+    return setPhotos(newPhotos);
+  };
+
   return (
     <div className="section">
       <div className="container">
@@ -88,7 +153,10 @@ export const App: React.FC = () => {
               <a
                 className={cn({ 'is-active': selectedUserId === 0 })}
                 href="#/"
-                onClick={() => setSelectedUserId(0)}
+                onClick={() => {
+                  setSelectedUserId(0);
+                  setPhotos(allPhotos);
+                }}
               >
                 All
               </a>
@@ -98,7 +166,10 @@ export const App: React.FC = () => {
                   className={cn({ 'is-active': selectedUserId === user.id })}
                   href="#/"
                   key={user.id}
-                  onClick={() => setSelectedUserId(user.id)}
+                  onClick={() => {
+                    setSelectedUserId(user.id);
+                    setPhotos(allPhotos);
+                  }}
                 >
                   {user.name}
                 </a>
@@ -113,7 +184,10 @@ export const App: React.FC = () => {
                   className="input"
                   placeholder="Search"
                   value={serchedQuery}
-                  onChange={(event) => setSerchedQuery(event.target.value)}
+                  onChange={(event) => {
+                    setSerchedQuery(event.target.value);
+                    setPhotos(allPhotos);
+                  }}
                 />
 
                 <span className="icon is-left">
@@ -136,7 +210,6 @@ export const App: React.FC = () => {
             <div className="panel-block is-flex-wrap-wrap">
               <a
                 href="#/"
-                // className="button is-success mr-6 is-outlined"
                 className={cn('button is-success mr-6',
                   { 'is-outlined': selectedAlbumIds.length })}
                 onClick={clearSelectedAlbums}
@@ -146,12 +219,14 @@ export const App: React.FC = () => {
 
               {albumsFromServer.map(albom => (
                 <a
-                  // className="button mr-2 my-1 is-info"
-                  className={cn('button mr-2 my-1',
+                  className={cn('button mr-2 my-1 myButtons',
                     { 'is-info': selectedAlbumIds.includes(albom.id) })}
                   href="#/"
                   key={albom.id}
-                  onClick={() => onSelectedAlbumIds(albom.id)}
+                  onClick={() => {
+                    onSelectedAlbumIds(albom.id);
+                    setPhotos(allPhotos);
+                  }}
                 >
                   {albom.title}
                 </a>
@@ -178,98 +253,94 @@ export const App: React.FC = () => {
           <table
             className="table is-striped is-narrow is-fullwidth"
           >
+            <thead>
+              <tr>
+                <th>
+                  <span className="is-flex is-flex-wrap-nowrap">
+                    ID
+
+                    <a href="#/">
+                      <span className="icon">
+                        <i data-cy="SortIcon" className="fas fa-sort" />
+                      </span>
+                    </a>
+                  </span>
+                </th>
+
+                <th>
+                  <span className="is-flex is-flex-wrap-nowrap">
+                    Photo name
+
+                    <a href="#/">
+                      <span className="icon">
+                        <i className="fas fa-sort-down" />
+                      </span>
+                    </a>
+                  </span>
+                </th>
+
+                <th>
+                  <span className="is-flex is-flex-wrap-nowrap">
+                    Album name
+
+                    <a href="#/">
+                      <span className="icon">
+                        <i className="fas fa-sort-up" />
+                      </span>
+                    </a>
+                  </span>
+                </th>
+
+                <th>
+                  <span className="is-flex is-flex-wrap-nowrap">
+                    User name
+
+                    <a href="#/">
+                      <span className="icon">
+                        <i className="fas fa-sort" />
+                      </span>
+                    </a>
+                  </span>
+                </th>
+              </tr>
+            </thead>
+
             {visiblePhotos.map(photo => (
-              <thead key={photo.id}>
+              <tbody key={photo.id}>
                 <tr>
-                  <th>
-                    <span className="is-flex is-flex-wrap-nowrap">
-                      {photo.id}
+                  <td className="has-text-weight-bold">
+                    {photo.id}
+                  </td>
 
-                      <a href="#/">
-                        <span className="icon">
-                          <i data-cy="SortIcon" className="fas fa-sort" />
-                        </span>
-                      </a>
-                    </span>
-                  </th>
+                  <td>{photo.title}</td>
+                  <td>{photo.album?.title}</td>
 
-                  <th>
-                    <span className="is-flex is-flex-wrap-nowrap">
-                      {photo.title}
+                  <td className={cn(photo.user?.sex === 'm'
+                    ? 'has-text-link'
+                    : 'has-text-danger')}
+                  >
+                    {photo.user?.name}
+                  </td>
 
-                      <a href="#/">
-                        <span className="icon">
-                          <i className="fas fa-sort-down" />
-                        </span>
-                      </a>
-                    </span>
-                  </th>
-
-                  <th>
-                    <span className="is-flex is-flex-wrap-nowrap">
-                      {photo.album?.title}
-
-                      <a href="#/">
-                        <span className="icon">
-                          <i className="fas fa-sort-up" />
-                        </span>
-                      </a>
-                    </span>
-                  </th>
-
-                  <th>
-                    <span
-                      className={cn({
-                        'is-flex is-flex-wrap-nowrap has-text-link':
-                        photo.user?.sex === 'm',
-                        'is-flex is-flex-wrap-nowrap has-text-danger':
-                        photo.user?.sex === 'f',
-                      })}
-                    >
-                      {photo.user?.name}
-
-                      <a href="#/">
-                        <span className="icon">
-                          <i className="fas fa-sort" />
-                        </span>
-                      </a>
-                    </span>
-                  </th>
-
-                  <th>
+                  <td>
                     <button
                       type="button"
-                      onClick={() => moveUpPhoto(photo.id)}
+                      onClick={() => moveDownPhoto(photo.id)}
                     >
                       &darr;
                     </button>
 
                     <button
                       type="button"
-                      onClick={() => moveDownPhoto(photo.id)}
+                      onClick={() => moveUpPhoto(photo.id)}
                     >
                       &uarr;
                     </button>
+                  </td>
 
-                  </th>
                 </tr>
-              </thead>
+              </tbody>
             ))}
-            {/* <tbody>
-              <tr>
-                <td className="has-text-weight-bold">
-                  1
-                </td>
-
-                <td>accusamus beatae ad facilis cum similique qui sunt</td>
-                <td>quidem molestiae enim</td>
-
-                <td className="has-text-link">
-                  Max
-                </td>
-              </tr>
-            </tbody> */}
-
           </table>
 
         </div>
