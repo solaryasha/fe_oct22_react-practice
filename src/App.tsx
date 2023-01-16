@@ -225,6 +225,21 @@ export const App: React.FC = () => {
                       </a>
                     </span>
                   </th>
+
+                  <th>
+                    <button
+                      type="button"
+                    >
+                      &darr;
+                    </button>
+
+                    <button
+                      type="button"
+                    >
+                      &uarr;
+                    </button>
+
+                  </th>
                 </tr>
               </thead>
             ))}
