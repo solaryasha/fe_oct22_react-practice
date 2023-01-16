@@ -5,9 +5,13 @@ import { FullPhoto } from '../../types/types';
 
 type Props = {
   photo: FullPhoto;
+  onMoveUp: (photoId: number) => void;
+  onMoveDown: (photoId: number) => void;
 };
 
-export const PhotoItem: React.FC<Props> = ({ photo }) => {
+export const PhotoItem: React.FC<Props> = (props) => {
+  const { photo, onMoveUp, onMoveDown } = props;
+
   return (
     <tr>
       <td className="has-text-weight-bold">
@@ -23,6 +27,23 @@ export const PhotoItem: React.FC<Props> = ({ photo }) => {
       )}
       >
         {photo.user?.name}
+      </td>
+
+      <td>
+        {/* eslint-disable-next-line react/button-has-type */}
+        <button
+          className="button is-info is-outlined"
+          onClick={() => onMoveDown(photo.id)}
+        >
+          &darr;
+        </button>
+        {/* eslint-disable-next-line react/button-has-type */}
+        <button
+          className="button is-info is-outlined"
+          onClick={() => onMoveUp(photo.id)}
+        >
+          &uarr;
+        </button>
       </td>
     </tr>
   );

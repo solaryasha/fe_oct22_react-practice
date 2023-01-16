@@ -24,7 +24,7 @@ const getPreparedPhotos = (): FullPhoto[] => {
 };
 
 export const App: React.FC = () => {
-  const [photos] = useState(getPreparedPhotos);
+  const [photos, setPhotos] = useState(getPreparedPhotos);
   const [selectedUserId, setSelectedUserId] = useState(0);
   const [query, setQuery] = useState('');
   const [selectedAlbumsId, setSelectedAlbumsId] = useState<number[]>([]);
@@ -44,6 +44,50 @@ export const App: React.FC = () => {
         albumId,
       ]);
     }
+  };
+
+  const moveUp = (photoId: number) => {
+    setPhotos(currentPhotos => {
+      const selectedPosition = currentPhotos.findIndex(photo => (
+        photo.id === photoId
+      ));
+
+      if (selectedPosition === 0) {
+        return currentPhotos;
+      }
+
+      const currentPhoto = currentPhotos[selectedPosition];
+      const previousPhoto = currentPhotos[selectedPosition - 1];
+
+      const newPhotos = [...currentPhotos];
+
+      newPhotos[selectedPosition] = previousPhoto;
+      newPhotos[selectedPosition - 1] = currentPhoto;
+
+      return newPhotos;
+    });
+  };
+
+  const moveDown = (photoId: number) => {
+    setPhotos(currentPhotos => {
+      const selectedPosition = currentPhotos.findIndex(photo => (
+        photo.id === photoId
+      ));
+
+      if (selectedPosition === currentPhotos.length - 1) {
+        return currentPhotos;
+      }
+
+      const currentPhoto = currentPhotos[selectedPosition];
+      const nextPhoto = currentPhotos[selectedPosition + 1];
+
+      const newPhotos = [...currentPhotos];
+
+      newPhotos[selectedPosition] = nextPhoto;
+      newPhotos[selectedPosition + 1] = currentPhoto;
+
+      return newPhotos;
+    });
   };
 
   const normalizedQuery = query.toLowerCase().trim();
@@ -229,6 +273,8 @@ export const App: React.FC = () => {
                     <PhotoItem
                       key={photo.id}
                       photo={photo}
+                      onMoveUp={moveUp}
+                      onMoveDown={moveDown}
                     />
                   ))}
                 </tbody>
