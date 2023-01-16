@@ -131,7 +131,10 @@ export const App: React.FC = () => {
             <div className="panel-block is-flex-wrap-wrap">
               <a
                 href="#/"
-                className="button is-success mr-6 is-outlined"
+                className={classNames(
+                  'button is-success mr-6',
+                  { 'is-outlined': selectedAlbumsIds.length > 0 },
+                )}
                 onClick={() => setSelectedAlbumsIds([])}
               >
                 All
