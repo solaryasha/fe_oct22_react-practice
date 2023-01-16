@@ -9,10 +9,22 @@ import usersFromServer from './api/users';
 export const App: React.FC = () => {
   const [photos] = useState<PreparedPhoto[]>(preparePhotosForRender);
   const [selectedUser, setSelectedUser] = useState(0);
+  const [query, setQuery] = useState('');
 
-  const visiblePhotos = selectedUser === 0
+  const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setQuery(event.currentTarget.value);
+  }
+
+  let visiblePhotos = selectedUser === 0
     ? photos
     : photos.filter(photo => photo.user?.id === selectedUser);
+
+  visiblePhotos = visiblePhotos.filter(photo => {
+    const lowerTitle = photo.title.toLowerCase();
+    const lowerQuery = query.toLowerCase().trim();
+
+    return lowerTitle.includes(lowerQuery);
+  });
 
   return (
     <div className="section">
@@ -52,20 +64,26 @@ export const App: React.FC = () => {
                   type="text"
                   className="input"
                   placeholder="Search"
-                  value="qwe"
+                  value={query}
+                  onChange={handleInput}
                 />
 
                 <span className="icon is-left">
                   <i className="fas fa-search" aria-hidden="true" />
                 </span>
 
-                <span className="icon is-right">
-                  {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
-                  <button
-                    type="button"
-                    className="delete"
-                  />
-                </span>
+                {
+                  query && (
+                    <span className="icon is-right">
+                      {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
+                      <button
+                        type="button"
+                        className="delete"
+                        onClick={() => setQuery('')}
+                      />
+                    </span>
+                  )
+                }
               </p>
             </div>
 
