@@ -13,7 +13,12 @@ export const App: React.FC = () => {
 
   const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(event.currentTarget.value);
-  }
+  };
+
+  const handleClearAll = () => {
+    setSelectedUser(0);
+    setQuery('');
+  };
 
   let visiblePhotos = selectedUser === 0
     ? photos
@@ -133,7 +138,7 @@ export const App: React.FC = () => {
               <a
                 href="#/"
                 className="button is-link is-outlined is-fullwidth"
-
+                onClick={handleClearAll}
               >
                 Reset all filters
               </a>
@@ -142,11 +147,17 @@ export const App: React.FC = () => {
         </div>
 
         <div className="box table-container">
-          <p data-cy="NoMatchingMessage">
-            No photos matching selected criteria
-          </p>
 
-          <Table photos={visiblePhotos} />
+          {
+            visiblePhotos.length === 0
+              ? (
+                <p data-cy="NoMatchingMessage">
+                  No photos matching selected criteria
+                </p>
+              )
+              : <Table photos={visiblePhotos} />
+          }
+
         </div>
       </div>
     </div>
