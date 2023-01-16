@@ -5,7 +5,7 @@ import cn from 'classnames';
 import usersFromServer from './api/users';
 import photosFromServer from './api/photos';
 import albumsFromServer from './api/albums';
-import { Prepared } from './types/Photo';
+import { Photo, Prepared } from './types/Photo';
 import { Album } from './types/Album';
 import { User } from './types/User';
 import { filterPhotos } from './helpers/filterPhotos';
@@ -27,7 +27,7 @@ const preparedPhotos: Prepared[] = photosFromServer
   }));
 
 export const App: React.FC = () => {
-  const [photos] = useState(preparedPhotos);
+  const [photos, setPhotos] = useState(preparedPhotos);
   const [selectedUserId, setselectedUserId] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [
@@ -58,6 +58,54 @@ export const App: React.FC = () => {
     photos,
     { searchQuery, selectedAlbomsIds, selectedUserId },
   );
+
+  const moveDown = (selectedPhoto: Photo) => {
+    setPhotos((prev) => {
+      const position = prev.findIndex(
+        (photo) => photo.id === selectedPhoto.id,
+      );
+
+      if (position === 0) {
+        return photos;
+      }
+
+      const currentPhoto = prev[position];
+      const previousPhoto = prev[position - 1];
+
+      const newPhotos = [
+        ...prev,
+      ];
+
+      newPhotos[position] = previousPhoto;
+      newPhotos[position - 1] = currentPhoto;
+
+      return newPhotos;
+    });
+  };
+
+  const moveUp = (selectedPhoto: Photo) => {
+    setPhotos((prev) => {
+      const position = prev.findIndex(
+        (photo) => photo.id === selectedPhoto.id,
+      );
+
+      if (position === prev.length - 1) {
+        return photos;
+      }
+
+      const currentPhoto = prev[position];
+      const nextPhoto = prev[position + 1];
+
+      const newPhotos = [
+        ...prev,
+      ];
+
+      newPhotos[position] = nextPhoto;
+      newPhotos[position + 1] = currentPhoto;
+
+      return newPhotos;
+    });
+  };
 
   return (
     <div className="section">
@@ -239,6 +287,21 @@ export const App: React.FC = () => {
                     })}
                   >
                     {photo.user?.name}
+                  </td>
+                  <td className="is-flex is-flex-wrap-nowrap">
+                    <button
+                      type="button"
+                      onClick={() => moveDown(photo)}
+                    >
+                      &darr;
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => moveUp(photo)}
+                    >
+                      &uarr;
+                    </button>
                   </td>
                 </tr>
               ))}
