@@ -24,16 +24,21 @@ export const App: React.FC = () => {
   const [photos] = useState(allDataFromServer);
   const [query, setQuery] = useState('');
   const [filterBy, setFilter] = useState('All');
+  const [selectedAlbums, setSelectedAlbums] = useState<string[]>([]);
 
   const photosFilter = () => {
     const newQuery = query.toLowerCase().trim();
 
     return photos.filter(photo => {
       if (filterBy === 'All') {
-        return photo?.title.toLowerCase().includes(newQuery);
+        return (selectedAlbums.length === 0
+          || (photo.albumTitle && selectedAlbums.includes(photo.albumTitle)))
+          && photo?.title.toLowerCase().includes(newQuery);
       }
 
       return photo?.userName === filterBy
+        && (selectedAlbums.length === 0
+          || (photo.albumTitle && selectedAlbums.includes(photo.albumTitle)))
         && photo?.title.toLowerCase().includes(newQuery);
     });
   };
@@ -103,43 +108,25 @@ export const App: React.FC = () => {
             <div className="panel-block is-flex-wrap-wrap">
               <a
                 href="#/"
-                className="button is-success mr-6 is-outlined"
+                className={cn('button is-success mr-6',
+                  { 'is-outlined': selectedAlbums.length !== 0 })}
+                onClick={() => setSelectedAlbums([])}
               >
                 All
               </a>
 
-              <a
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Album 1
-              </a>
-
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 2
-              </a>
-
-              <a
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Album 3
-              </a>
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 4
-              </a>
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 5
-              </a>
+              {albumsFromServer.map(album => (
+                <a
+                  className={cn('button mr-2 my-1',
+                    { 'is-info': selectedAlbums.includes(album.title) })}
+                  href="#/"
+                  onClick={() => setSelectedAlbums(
+                    [...selectedAlbums, album.title],
+                  )}
+                >
+                  {album.title.split(' ')[0]}
+                </a>
+              ))}
             </div>
 
             <div className="panel-block">
@@ -149,6 +136,7 @@ export const App: React.FC = () => {
                 onClick={() => {
                   setQuery('');
                   setFilter('All');
+                  setSelectedAlbums([]);
                 }}
               >
                 Reset all filters
