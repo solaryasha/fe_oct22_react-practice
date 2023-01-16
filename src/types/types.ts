@@ -18,9 +18,9 @@ export interface Users {
 }
 
 export interface TotalAlbums extends Albums {
-  owner?: Users,
+  owner?: Users | null,
 }
 
 export interface TotalPhotos extends Photos {
-  album?: TotalAlbums,
+  album?: TotalAlbums | null,
 }

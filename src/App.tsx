@@ -30,6 +30,24 @@ const getPreparedPhotos = (): TotalPhotos[] => {
 
 export const App: React.FC = () => {
   const [photos] = useState(getPreparedPhotos());
+  const [selectedUserId, setSelectedUserId] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const preparedSearchQuery = searchQuery.toLowerCase().trim();
+
+  const visiblePhotos = photos.filter(photo => {
+    const preparedTitle = photo.title.toLowerCase();
+
+    const isUserIdSelected = selectedUserId !== 0
+      ? photo.album?.owner?.id === selectedUserId
+      : true;
+
+    const isQueryMatch = searchQuery
+      ? preparedTitle.includes(preparedSearchQuery)
+      : true;
+
+    return isUserIdSelected && isQueryMatch;
+  });
 
   return (
     <div className="section">
@@ -43,28 +61,22 @@ export const App: React.FC = () => {
             <p className="panel-tabs has-text-weight-bold">
               <a
                 href="#/"
+                className={cn({ 'is-active': selectedUserId === 0 })}
+                onClick={() => setSelectedUserId(0)}
               >
                 All
               </a>
 
-              <a
-                href="#/"
-              >
-                User 1
-              </a>
-
-              <a
-                href="#/"
-                className="is-active"
-              >
-                User 2
-              </a>
-
-              <a
-                href="#/"
-              >
-                User 3
-              </a>
+              {usersFromServer.map(user => (
+                <a
+                  key={user.id}
+                  href="#/"
+                  className={cn({ 'is-active': selectedUserId === user.id })}
+                  onClick={() => setSelectedUserId(user.id)}
+                >
+                  {user.name}
+                </a>
+              ))}
             </p>
 
             <div className="panel-block">
@@ -73,20 +85,24 @@ export const App: React.FC = () => {
                   type="text"
                   className="input"
                   placeholder="Search"
-                  value="qwe"
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
                 />
 
                 <span className="icon is-left">
                   <i className="fas fa-search" aria-hidden="true" />
                 </span>
 
-                <span className="icon is-right">
-                  {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
-                  <button
-                    type="button"
-                    className="delete"
-                  />
-                </span>
+                {searchQuery && (
+                  <span className="icon is-right">
+                    {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
+                    <button
+                      type="button"
+                      className="delete"
+                      onClick={() => setSearchQuery('')}
+                    />
+                  </span>
+                )}
               </p>
             </div>
 
@@ -205,7 +221,7 @@ export const App: React.FC = () => {
             </thead>
 
             <tbody>
-              {photos.map(photo => (
+              {visiblePhotos.map(photo => (
                 <tr>
                   <td className="has-text-weight-bold">
                     {photo.id}
