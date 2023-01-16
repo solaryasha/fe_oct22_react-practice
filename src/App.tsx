@@ -1,11 +1,32 @@
-import React from 'react';
+import React, { useState } from 'react';
+import cn from 'classnames';
+import albums from './api/albums';
+import users from './api/users';
 import './App.scss';
-
-// import usersFromServer from './api/users';
-// import photosFromServer from './api/photos';
-// import albumsFromServer from './api/albums';
+import { getPreparedPhotos } from './api/getPreparedphotos';
+// import { filterPhotos } from './filterPhotos';
 
 export const App: React.FC = () => {
+  const [photos] = useState(getPreparedPhotos);
+  const [selectedUserId, setSelectedUseriD] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
+  // const [selectedAlbumsIds, setSelectedAlbumsIds] = useState<number[]>([]);
+
+  // const onSelectAlbumsFilter = (id: number) => {
+  //   setSelectedAlbumsIds((prev) => {
+  //     if (prev.includes(id)) {
+  //       return prev.filter(l => l !== id);
+  //     }
+
+  //     return [...prev, id];
+  //   });
+  // };
+
+  // const visiblePhotos = filterPhotos(
+  //   photos,
+  //   { searchQuery, selectedAlbumsIds, selectedUserId },
+  // );
+
   return (
     <div className="section">
       <div className="container">
@@ -22,24 +43,16 @@ export const App: React.FC = () => {
                 All
               </a>
 
-              <a
-                href="#/"
-              >
-                User 1
-              </a>
-
-              <a
-                href="#/"
-                className="is-active"
-              >
-                User 2
-              </a>
-
-              <a
-                href="#/"
-              >
-                User 3
-              </a>
+              {users.map(user => (
+                <a
+                  href="#/"
+                  className={cn({ 'is-active': selectedUserId === user.id })}
+                  key={user.id}
+                  onClick={() => setSelectedUseriD(user.id)}
+                >
+                  {`User ${user.id}`}
+                </a>
+              ))}
             </p>
 
             <div className="panel-block">
@@ -48,7 +61,8 @@ export const App: React.FC = () => {
                   type="text"
                   className="input"
                   placeholder="Search"
-                  value="qwe"
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
                 />
 
                 <span className="icon is-left">
@@ -72,39 +86,14 @@ export const App: React.FC = () => {
               >
                 All
               </a>
-
-              <a
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Album 1
-              </a>
-
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 2
-              </a>
-
-              <a
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Album 3
-              </a>
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 4
-              </a>
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 5
-              </a>
+              {albums.map(album => (
+                <a
+                  className="button mr-2 my-1 is-info"
+                  href="#/"
+                >
+                  {`Album ${album.id}`}
+                </a>
+              ))}
             </div>
 
             <div className="panel-block">
@@ -179,20 +168,27 @@ export const App: React.FC = () => {
               </tr>
             </thead>
 
-            <tbody>
-              <tr>
-                <td className="has-text-weight-bold">
-                  1
-                </td>
+            {photos.map(photo => (
+              <tbody>
+                <tr>
+                  <td className="has-text-weight-bold">
+                    {photo.id}
+                  </td>
 
-                <td>accusamus beatae ad facilis cum similique qui sunt</td>
-                <td>quidem molestiae enim</td>
+                  <td>{photo.title}</td>
+                  <td>{photo.album.title}</td>
 
-                <td className="has-text-link">
-                  Max
-                </td>
-              </tr>
-            </tbody>
+                  <td
+                    className={cn(
+                      'has-text-link',
+                      { 'has-text-danger': photo.user.sex === 'f' },
+                    )}
+                  >
+                    {photo.user.name}
+                  </td>
+                </tr>
+              </tbody>
+            ))}
           </table>
         </div>
       </div>
