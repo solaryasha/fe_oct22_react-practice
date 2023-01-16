@@ -25,6 +25,12 @@ export const App: React.FC = () => {
     setSelectedAlbumsId([]);
   };
 
+  const handleResetAllFilters = () => {
+    handleSelectedAllAlbums();
+    setSearch('');
+    setSelectedUserId(0);
+  };
+
   const visiblePhotos = photos.filter(photo => {
     const isSearchMatch = photo.title.toLowerCase()
       .includes(search.toLowerCase());
@@ -127,7 +133,7 @@ export const App: React.FC = () => {
               <a
                 href="#/"
                 className="button is-link is-outlined is-fullwidth"
-
+                onClick={handleResetAllFilters}
               >
                 Reset all filters
               </a>
@@ -136,9 +142,11 @@ export const App: React.FC = () => {
         </div>
 
         <div className="box table-container">
-          <p data-cy="NoMatchingMessage">
-            No photos matching selected criteria
-          </p>
+          {!(visiblePhotos.length) && (
+            <p data-cy="NoMatchingMessage">
+              No photos matching selected criteria
+            </p>
+          )}
 
           <table
             className="table is-striped is-narrow is-fullwidth"
