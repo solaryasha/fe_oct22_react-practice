@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './App.scss';
 import classNames from 'classnames';
 
@@ -34,6 +34,16 @@ const photos: PreparedPhoto[] = photosFromServer.map(photo => {
 });
 
 export const App: React.FC = () => {
+  const [selectedUserId, setSelectedUserId] = useState(0);
+
+  let visiblePhotos = photos;
+
+  if (selectedUserId) {
+    visiblePhotos = visiblePhotos.filter(photo => (
+      photo.user?.id === selectedUserId
+    ));
+  }
+
   return (
     <div className="section">
       <div className="container">
@@ -46,6 +56,10 @@ export const App: React.FC = () => {
             <p className="panel-tabs has-text-weight-bold">
               <a
                 href="#/"
+                onClick={() => setSelectedUserId(0)}
+                className={classNames({
+                  'is-active': selectedUserId === 0,
+                })}
               >
                 All
               </a>
@@ -54,6 +68,10 @@ export const App: React.FC = () => {
                 <a
                   href="#/"
                   key={user.id}
+                  onClick={() => setSelectedUserId(user.id)}
+                  className={classNames({
+                    'is-active': selectedUserId === user.id,
+                  })}
                 >
                   {user.name}
                 </a>
@@ -175,7 +193,7 @@ export const App: React.FC = () => {
             </thead>
 
             <tbody>
-              {photos.map(photo => (
+              {visiblePhotos.map(photo => (
                 <tr key={photo.id}>
                   <td className="has-text-weight-bold">
                     {photo.id}
