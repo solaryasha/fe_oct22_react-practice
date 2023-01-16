@@ -27,6 +27,15 @@ const preparedPhotos: PreparedPhoto[] = photosFromServer.map(photo => {
 
 export const App: React.FC = () => {
   const [photos] = useState(preparedPhotos);
+  const [selectedUserId, setSelectedUserId] = useState(0);
+
+  const visiblePhotos = photos.filter(photo => {
+    const isSelectedUserIdMatch = selectedUserId !== 0
+      ? selectedUserId === photo.user?.id
+      : true;
+
+    return isSelectedUserIdMatch;
+  });
 
   return (
     <div className="section">
@@ -40,28 +49,26 @@ export const App: React.FC = () => {
             <p className="panel-tabs has-text-weight-bold">
               <a
                 href="#/"
+                className={cn(
+                  { 'is-active': !selectedUserId },
+                )}
+                onClick={() => setSelectedUserId(0)}
               >
                 All
               </a>
 
-              <a
-                href="#/"
-              >
-                User 1
-              </a>
-
-              <a
-                href="#/"
-                className="is-active"
-              >
-                User 2
-              </a>
-
-              <a
-                href="#/"
-              >
-                User 3
-              </a>
+              {usersFromServer.map(user => (
+                <a
+                  key={user.id}
+                  href="#/"
+                  className={cn(
+                    { 'is-active': selectedUserId === user.id },
+                  )}
+                  onClick={() => setSelectedUserId(user.id)}
+                >
+                  {user.name}
+                </a>
+              ))}
             </p>
 
             <div className="panel-block">
@@ -202,7 +209,7 @@ export const App: React.FC = () => {
             </thead>
 
             <tbody>
-              {photos.map(photo => (
+              {visiblePhotos.map(photo => (
                 <tr key={photo.id}>
                   <td className="has-text-weight-bold">
                     {photo.id}
