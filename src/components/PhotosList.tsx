@@ -2,6 +2,7 @@ import { FC, memo } from 'react';
 import cn from 'classnames';
 
 import { FullPhoto } from '../types/Photo';
+import { getShortString } from '../helpers/getShortString';
 
 type Props = {
   photos: FullPhoto[],
@@ -73,9 +74,7 @@ export const PhotosList: FC<Props> = memo(({ photos }) => {
 
             <td>{title}</td>
             <td>
-              {(album?.title && album?.title?.length <= 21)
-                ? album?.title
-                : `${album?.title.slice(0, 21)}...`}
+              {album?.title && getShortString(album?.title, 21)}
             </td>
 
             <td

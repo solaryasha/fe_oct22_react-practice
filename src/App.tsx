@@ -5,6 +5,7 @@ import './App.scss';
 import { getPreparedPhotos } from './helpers/getPreparedPhotos';
 import albums from './api/albums';
 import { PhotosList } from './components/PhotosList';
+import { getShortString } from './helpers/getShortString';
 
 export const App: React.FC = () => {
   const [photos] = useState(getPreparedPhotos);
@@ -139,7 +140,7 @@ export const App: React.FC = () => {
                   href="#/"
                   onClick={() => handleAlbumClick(id)}
                 >
-                  {title}
+                  {getShortString(title, 15)}
                 </a>
               ))}
             </div>
