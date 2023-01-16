@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import cn from 'classnames';
 
 import './App.scss';
 
@@ -8,6 +9,7 @@ import albumsFromServer from './api/albums';
 
 import { FullPhoto } from './Types/types';
 import { TableItem } from './TableItem';
+import users from './api/users';
 
 const findAlbumById = (albumId: number) => {
   return albumsFromServer.find(album => album.id === albumId);
@@ -32,6 +34,15 @@ const getPreparedPhotos = (): FullPhoto[] => {
 
 export const App: React.FC = () => {
   const [photos] = useState(getPreparedPhotos);
+  const [selectedUserId, setSelectedUserId] = useState(0);
+
+  const visiblePhotos = photos.filter(photo => {
+    const isUserIdSelected = selectedUserId !== 0
+      ? photo.user?.id === selectedUserId
+      : true;
+
+    return isUserIdSelected;
+  });
 
   return (
     <div className="section">
@@ -45,28 +56,22 @@ export const App: React.FC = () => {
             <p className="panel-tabs has-text-weight-bold">
               <a
                 href="#/"
+                className={cn({ 'is-active': selectedUserId === 0 })}
+                onClick={() => setSelectedUserId(0)}
               >
                 All
               </a>
 
-              <a
-                href="#/"
-              >
-                User 1
-              </a>
-
-              <a
-                href="#/"
-                className="is-active"
-              >
-                User 2
-              </a>
-
-              <a
-                href="#/"
-              >
-                User 3
-              </a>
+              {users.map(user => (
+                <a
+                  key={user.id}
+                  href="#/"
+                  className={cn({ 'is-active': selectedUserId === user.id })}
+                  onClick={() => setSelectedUserId(user.id)}
+                >
+                  {user.name}
+                </a>
+              ))}
             </p>
 
             <div className="panel-block">
@@ -207,7 +212,7 @@ export const App: React.FC = () => {
             </thead>
 
             <tbody>
-              {photos.map(photo => (
+              {visiblePhotos.map(photo => (
                 <TableItem
                   key={photo.id}
                   photo={photo}
