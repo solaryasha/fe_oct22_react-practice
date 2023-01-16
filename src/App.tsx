@@ -13,9 +13,13 @@ export const App: React.FC = () => {
   const [selectedUserId, setSelectedUserId] = useState(0);
 
   const visiblePhotos = photos.filter(photo => {
+    const isUserMatch = selectedUserId
+      ? photo.album?.user?.id === selectedUserId
+      : true;
+
     return photo.title.toLowerCase().includes(
       searchQuery.toLocaleLowerCase(),
-    );
+    ) && isUserMatch;
   });
 
   return (
