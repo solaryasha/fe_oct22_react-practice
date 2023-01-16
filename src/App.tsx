@@ -7,6 +7,7 @@ import { findAlbumById, findUserById } from './helpers/helpers';
 import { FullPhoto } from './types/types';
 import { PhotoItem } from './components/PhotoItem/PhotoItem';
 import users from './api/users';
+import albums from './api/albums';
 
 const getPreparedPhotos = (): FullPhoto[] => {
   return photosFromServer.map(photo => {
@@ -26,6 +27,24 @@ export const App: React.FC = () => {
   const [photos] = useState(getPreparedPhotos);
   const [selectedUserId, setSelectedUserId] = useState(0);
   const [query, setQuery] = useState('');
+  const [selectedAlbumsId, setSelectedAlbumsId] = useState<number[]>([]);
+
+  const resetAllFilters = () => {
+    setSelectedUserId(0);
+    setQuery('');
+    setSelectedAlbumsId([]);
+  };
+
+  const handleSelectAlbum = (albumId: number) => {
+    if (selectedAlbumsId.includes(albumId)) {
+      setSelectedAlbumsId(selectedAlbumsId.filter(id => id !== albumId));
+    } else {
+      setSelectedAlbumsId(albumsIds => [
+        ...albumsIds,
+        albumId,
+      ]);
+    }
+  };
 
   const normalizedQuery = query.toLowerCase().trim();
 
@@ -40,13 +59,12 @@ export const App: React.FC = () => {
       ? normalizedTitle.includes(normalizedQuery)
       : true;
 
-    return isUserIdSelected && isQueryMatch;
-  });
+    const isAlbumMatch = selectedAlbumsId.length
+      ? selectedAlbumsId.includes(photo.albumId)
+      : true;
 
-  const resetAllFilters = () => {
-    setSelectedUserId(0);
-    setQuery('');
-  };
+    return isUserIdSelected && isQueryMatch && isAlbumMatch;
+  });
 
   return (
     <div className="section">
@@ -108,43 +126,28 @@ export const App: React.FC = () => {
             <div className="panel-block is-flex-wrap-wrap">
               <a
                 href="#/"
-                className="button is-success mr-6 is-outlined"
+                className={cn(
+                  'button is-success mr-6',
+                  { 'is-outlined': selectedAlbumsId.length },
+                )}
+                onClick={() => setSelectedAlbumsId([])}
               >
                 All
               </a>
 
-              <a
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Album 1
-              </a>
-
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 2
-              </a>
-
-              <a
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Album 3
-              </a>
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 4
-              </a>
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 5
-              </a>
+              {albums.map(album => (
+                <a
+                  key={album.id}
+                  className={cn(
+                    'button mr-2 my-1',
+                    { 'is-info': selectedAlbumsId.includes(album.id) },
+                  )}
+                  href="#/"
+                  onClick={() => handleSelectAlbum(album.id)}
+                >
+                  {album.title.split(' ')[0]}
+                </a>
+              ))}
             </div>
 
             <div className="panel-block">
