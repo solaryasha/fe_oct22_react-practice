@@ -3,11 +3,27 @@ import classNames from 'classnames';
 import { getPreparedPhotos } from './api/getPreparedPhotos';
 import './App.scss';
 import users from './api/users';
+import albums from './api/albums';
 
 export const App: React.FC = () => {
   const [photos] = useState(getPreparedPhotos);
   const [search, setSearch] = useState('');
   const [selectedUserId, setSelectedUserId] = useState(0);
+  const [selectedAlbumsId, setSelectedAlbumsId] = useState<number[]>([]);
+
+  const handleSelectAlbumFilter = (id: number) => {
+    setSelectedAlbumsId(prev => {
+      if (prev.includes(id)) {
+        return prev.filter(el => el !== id);
+      }
+
+      return [...prev, id];
+    });
+  };
+
+  const handleSelectedAllAlbums = () => {
+    setSelectedAlbumsId([]);
+  };
 
   const visiblePhotos = photos.filter(photo => {
     const isSearchMatch = photo.title.toLowerCase()
@@ -15,8 +31,11 @@ export const App: React.FC = () => {
     const isUserIdMatch = selectedUserId
       ? photo.owner?.id === selectedUserId
       : true;
+    const isAlbumIdMatch = selectedAlbumsId.length
+      ? selectedAlbumsId.includes(photo.album?.id || 0)
+      : true;
 
-    return isSearchMatch && isUserIdMatch;
+    return isSearchMatch && isUserIdMatch && isAlbumIdMatch;
   });
 
   return (
@@ -68,11 +87,14 @@ export const App: React.FC = () => {
                 </span>
 
                 <span className="icon is-right">
-                  {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
-                  <button
-                    type="button"
-                    className="delete"
-                  />
+                  {search && (
+                  /* eslint-disable-next-line jsx-a11y/control-has-associated-label */
+                    <button
+                      type="button"
+                      className="delete"
+                      onClick={() => setSearch('')}
+                    />
+                  )}
                 </span>
               </p>
             </div>
@@ -80,56 +102,25 @@ export const App: React.FC = () => {
             <div className="panel-block is-flex-wrap-wrap">
               <a
                 href="#/"
-                className="button is-success mr-6 is-outlined"
+                className={classNames('button is-success mr-6', {
+                  'is-outlined': selectedAlbumsId.length,
+                })}
+                onClick={handleSelectedAllAlbums}
               >
                 All
               </a>
 
-              {users.map(user => (
+              {albums.map(album => (
                 <a
-                  href="#/"
-                  className={classNames({
-                    'is-active': selectedUserId === user.id,
+                  className={classNames('button mr-2 my-1', {
+                    'is-info': selectedAlbumsId.includes(album.id),
                   })}
-                  onClick={() => setSelectedUserId(user.id)}
-                  key={user.id}
+                  href="#/"
+                  onClick={() => handleSelectAlbumFilter(album.id)}
                 >
-                  {user.name}
+                  {`Album ${album.id}`}
                 </a>
               ))}
-
-              <a
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Album 1
-              </a>
-
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 2
-              </a>
-
-              <a
-                className="button mr-2 my-1 is-info"
-                href="#/"
-              >
-                Album 3
-              </a>
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 4
-              </a>
-              <a
-                className="button mr-2 my-1"
-                href="#/"
-              >
-                Album 5
-              </a>
             </div>
 
             <div className="panel-block">
